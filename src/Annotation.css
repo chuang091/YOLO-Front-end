@@ -1,189 +1,60 @@
-body {
-  font-family: Arial, sans-serif;
+/* src/Annotation.css */
+.annotation-container {
   text-align: center;
   padding: 20px;
-  background-color: #f4f4f4;
+}
+
+.image-display {
+  display: flex;
   justify-content: center;
   align-items: center;
-  margin: 0;
-  overflow: auto;
+  gap: 20px;
 }
 
-#prev, #next ,#save-button {
-  background-color: #4CAF50;
-  color: white;
-  padding: 10px 20px;
-  margin: 10px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-#prev:hover, #next:hover {
-  background-color: #45a049;
-}
-
-.image-container {
+.canvas-container {
   position: relative;
-  display: inline-block;
+  max-width: 100%;
+  max-height: 80vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-#image-display {
-  height: auto;
-  display: block;
-}
-
-.detection-box, .overlay-div {
+#annotationCanvas {
   position: absolute;
-  border: 2px solid red;
-  background-color: rgba(255, 0, 0, 0.3);
-}
-
-.sidebar {
-  position: fixed;
+  top: 0;
   left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  background-color: #fff;
-  padding: 10px;
-  box-shadow: 0 0 5px rgba(0,0,0,0.2);
-  z-index: 1000;
+  z-index: 1;
 }
 
-.sidebar button {
-  display: block;
-  margin: 10px 0;
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-}
-
-.sidebar img {
-  width: 50px;
-  height: 50px;
-}
-
-nav {
-  display: block;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-ul {
-  margin-top: 0px;
-  margin-bottom: 10px;
-}
-
-.pagination {
-  display: inline-block;
-  padding-left: 0px;
-  margin: 20px 0px;
-  border-radius: 4px;
-}
-
-.pagination > li {
-  display: inline;
-}
-
-.pagination > li:first-child > a {
-  margin-left: 0px;
-  border-top-left-radius: 4px;
-  border-bottom-left-radius: 4px;
-}
-
-.pagination > li:last-child > a {
-  border-top-right-radius: 4px;
-  border-bottom-right-radius: 4px;
-}
-
-a {
-  background-color: transparent;
-}
-
-.pagination > li > a {
+.annotation-image {
   position: relative;
-  float: left;
-  padding: 6px 12px;
-  margin-left: -1px;
-  line-height: 1.42857;
-  color: rgb(51, 122, 183);
-  text-decoration: none;
-  background-color: rgb(255, 255, 255);
-  border: 1px solid rgb(221, 221, 221);
+  max-width: 100%;
+  max-height: 100%;
+  z-index: 0;
 }
 
-a:active {
-  outline: 0px;
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  border-radius: 5px;
+  transition: background-color 0.2s;
 }
 
-a:focus {
-  color: rgb(35, 82, 124);
-  text-decoration: underline;
+button:hover {
+  background-color: #0056b3;
 }
 
-.pagination > li > a:focus {
-  z-index: 3;
-  color: rgb(35, 82, 124);
-  background-color: rgb(238, 238, 238);
-  border-color: rgb(221, 221, 221);
+.back-button {
+  padding: 10px 20px;
+  margin-bottom: 20px;
 }
 
-a:visited {
-  text-decoration: underline;
-}
-
-a[href]::after {
-  content: " (" attr(href) ")";
-}
-
-a[href^="#"]::after {
-  content: "";
-}
-
-.pagination > .active > a {
-  z-index: 2;
-  color: rgb(255, 255, 255);
-  cursor: default;
-  background-color: rgb(51, 122, 183);
-  border-color: rgb(51, 122, 183);
-}
-
-.pagination > .active > a:focus {
-  z-index: 2;
-  color: rgb(255, 255, 255);
-  cursor: default;
-  background-color: rgb(51, 122, 183);
-  border-color: rgb(51, 122, 183);
-}
-
-#polygon-mode svg,
-#model-mode svg,
-#robot-mode svg {
-  background-color: transparent;
-  height: 30px;
-  width: 30px;
-  padding: 5px;
-}
-
-.active svg path {
-  fill: rgb(245, 245, 245);
-}
-
-.active svg {
-  background-color: rgb(58, 124, 247)!important;
-}
-
-.deactive svg path {
-  fill: rgb(30, 30, 30);
-}
-
-.segment-mark {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  border: 2px solid white;
+.page-info {
+  margin-top: 20px;
+  font-size: 18px;
 }

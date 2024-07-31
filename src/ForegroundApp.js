@@ -1,5 +1,7 @@
+// src/ForegroundApp.js
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import './App.css';
 
 function ForegroundApp() {
@@ -7,12 +9,13 @@ function ForegroundApp() {
   const [annotations, setAnnotations] = useState([]);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [selectedImages, setSelectedImages] = useState(new Set());
+  const navigate = useNavigate();
 
   useEffect(() => {
     axios.get('http://localhost:5500/api/images')
       .then(response => {
         console.log('Fetched images:', response.data);
-        setImages(response.data[0]);
+        setImages(response.data);
       })
       .catch(error => {
         console.error('There was an error fetching the images!', error);
@@ -31,6 +34,10 @@ function ForegroundApp() {
       setIsDataLoaded(true);
     }, 2000);
   }, []);
+
+  const handleNavigateToAnnotation = () => {
+    navigate('/annotation', { state: { selectedImages: Array.from(selectedImages), images, annotations } });
+  };
 
   const classColors = {
     "0": "rgba(255, 0, 0, 0.5)",
@@ -70,7 +77,7 @@ function ForegroundApp() {
     images.forEach(image => {
       const link = document.createElement('a');
       link.href = `data:image/jpeg;base64,${image.data}`;
-      link.download = `C:/Users/chuan/OneDrive/桌面/臺灣寶圖專題/images/${image.filename}`;
+      link.download = `${image.filename}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -135,6 +142,9 @@ function ForegroundApp() {
         <h1>圖片和標記數據檢視平台</h1>
         <button onClick={handleDownloadAllImages}>下載所有圖片</button>
         <button onClick={handleDeleteSelectedImages}>刪除選中的圖片</button>
+        <button onClick={handleNavigateToAnnotation} disabled={selectedImages.size === 0}>
+          前往標記頁面
+        </button>
       </div>
       {isDataLoaded ? (
         <div className="image-gallery">
