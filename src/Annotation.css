@@ -1,7 +1,13 @@
 /* src/Annotation.css */
 .annotation-container {
   text-align: center;
-  padding: 20px;
+  position: relative;
+  transition: width 0.3s ease, margin-right 0.3s ease; /* 平滑過渡 */
+}
+
+.annotation-container.pane-open {
+  width: 70%; /* 打開滑動面板時主畫面寬度變為70% */
+  margin-right: 30%; /* 留出30%的空間給滑動面板 */
 }
 
 .image-display {
@@ -9,6 +15,8 @@
   justify-content: center;
   align-items: center;
   gap: 20px;
+  width: 100%; /* 主畫面寬度為100%，當滑動面板打開時寬度會自動變為70% */
+  margin: 0 auto;
 }
 
 .canvas-container {
@@ -50,11 +58,38 @@ button:hover {
 }
 
 .back-button {
-  padding: 10px 20px;
   margin-bottom: 20px;
 }
 
 .page-info {
   margin-top: 20px;
   font-size: 18px;
+}
+
+.annotations-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.annotation-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.annotation-list li {
+  padding: 10px;
+  margin: 5px 0;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.annotation-list li:hover {
+  background-color: #e0e0e0;
+}
+
+.annotation-list li.active {
+  background-color: #d0d0d0;
 }

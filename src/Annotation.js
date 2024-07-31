@@ -1,6 +1,8 @@
 // src/Annotation.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import SlidingPane from 'react-sliding-pane';
+import 'react-sliding-pane/dist/react-sliding-pane.css';
 import './Annotation.css';
 
 const classColors = {
@@ -22,6 +24,8 @@ function Annotation() {
   const location = useLocation();
   const { selectedImages, images, annotations } = location.state || { selectedImages: [], images: [], annotations: [] };
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaneOpen, setIsPaneOpen] = useState(false);
+  const [hoveredAnnotation, setHoveredAnnotation] = useState(null);
 
   const handlePrevious = () => {
     setCurrentIndex((prevIndex) => (prevIndex === 0 ? selectedImages.length - 1 : prevIndex - 1));
@@ -42,7 +46,7 @@ function Annotation() {
     const imageAnnotations = annotations.filter(annotation => annotation.image_id === imageId);
 
     imageAnnotations.forEach(annotation => {
-      const color = classColors[annotation.class] || 'rgba(255, 255, 255, 0.5)';
+      const color = annotation === hoveredAnnotation ? 'rgba(255, 0, 0, 0.8)' : (classColors[annotation.class] || 'rgba(255, 255, 255, 0.5)');
       ctx.beginPath();
       ctx.fillStyle = color;
       const coords = annotation.coordinates;
@@ -59,6 +63,7 @@ function Annotation() {
 
   const currentImageId = selectedImages[currentIndex];
   const currentImage = images.find(image => image._id === currentImageId);
+  const currentAnnotations = annotations.filter(annotation => annotation.image_id === currentImageId);
 
   useEffect(() => {
     if (currentImage) {
@@ -74,11 +79,12 @@ function Annotation() {
         drawAnnotations(canvas, currentImageId);
       };
     }
-  }, [currentIndex, currentImageId]);
+  }, [currentIndex, currentImageId, hoveredAnnotation]);
 
   return (
-    <div className="annotation-container">
+    <div className={`annotation-container ${isPaneOpen ? 'pane-open' : ''}`}>
       <button onClick={handleBack} className="back-button">回到上一頁</button>
+      <button onClick={() => setIsPaneOpen(true)} className="annotations-button">查看標記</button>
       {currentImage ? (
         <div className="image-display">
           <button onClick={handlePrevious}>上一張</button>
@@ -94,6 +100,27 @@ function Annotation() {
       <div className="page-info">
         {currentIndex + 1} / {selectedImages.length}
       </div>
+      <SlidingPane
+        isOpen={isPaneOpen}
+        title="標記列表"
+        from="right"
+        width="30%"
+        onRequestClose={() => setIsPaneOpen(false)}
+        onAfterOpen={() => document.querySelector('.annotation-container').classList.add('pane-open')}
+        onAfterClose={() => document.querySelector('.annotation-container').classList.remove('pane-open')}
+      >
+        <ul className="annotation-list">
+          {currentAnnotations.map((annotation, index) => (
+            <li 
+              key={index}
+              onMouseEnter={() => setHoveredAnnotation(annotation)}
+              onMouseLeave={() => setHoveredAnnotation(null)}
+            >
+              類別: {annotation.class}, ID: {annotation._id}
+            </li>
+          ))}
+        </ul>
+      </SlidingPane>
     </div>
   );
 }
