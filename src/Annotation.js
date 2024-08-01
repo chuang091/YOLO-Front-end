@@ -5,6 +5,9 @@ import SlidingPane from 'react-sliding-pane';
 import 'react-sliding-pane/dist/react-sliding-pane.css';
 import './Annotation.css';
 import PolygonDrawer from './PolygonDrawer';
+import axios from 'axios';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTrash } from '@fortawesome/free-solid-svg-icons';  
 
 const classColors = {
   "0": "rgba(255, 0, 0, 0.5)",
@@ -97,6 +100,19 @@ function Annotation() {
     e.target.parentElement.classList.add('active');
   };
 
+  const handleDeleteAnnotation = (id) => {
+    axios.delete(`http://localhost:5500/api/annotations/${id}`)
+      .then(response => {
+        console.log('Annotation deleted:', response.data);
+        const updatedAnnotations = annotations.filter(annotation => annotation._id !== id);
+        setHoveredAnnotation(null); 
+        drawAnnotations(document.getElementById('annotationCanvas'), currentImageId);
+      })
+      .catch(error => {
+        console.error('Error deleting annotation:', error);
+      });
+  };
+
   return (
     <div className={`annotation-container ${isPaneOpen ? 'pane-open' : ''}`}>
       <div className="toolbar">
@@ -146,6 +162,9 @@ function Annotation() {
               onMouseLeave={() => setHoveredAnnotation(null)}
             >
               類別: {annotation.class}, ID: {annotation._id}
+              <button className="delete-button" onClick={() => handleDeleteAnnotation(annotation._id)}>
+              <FontAwesomeIcon icon={faTrash} />
+              </button>
             </li>
           ))}
         </ul>

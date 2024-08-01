@@ -114,6 +114,9 @@ button:hover {
 }
 
 .annotation-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 10px;
   margin: 5px 0;
   background-color: #f0f0f0;
@@ -128,4 +131,19 @@ button:hover {
 
 .annotation-list li.active {
   background-color: #d0d0d0;
+}
+
+.delete-button {
+  background: none;
+  border: none;
+  color: #d9534f;
+  cursor: pointer;
+}
+
+.delete-button:hover {
+  color: #c9302c;
+}
+
+.delete-button i {
+  font-size: 18px;
 }

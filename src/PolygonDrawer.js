@@ -117,7 +117,7 @@ const PolygonDrawer = ({ canvasId, imageId, existingAnnotations, polygonClass })
     const data = {
       image_id: imageId,
       coordinates: points.flat(),
-      class: polygonClass
+      class: polygonClass-1
     };
     axios.post('http://localhost:5500/api/annotations', data)
       .then(response => {
