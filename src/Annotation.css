@@ -2,12 +2,21 @@
 .annotation-container {
   text-align: center;
   position: relative;
-  transition: width 0.3s ease, margin-right 0.3s ease; /* 平滑過渡 */
+  transition: width 0.3s ease, margin-right 0.3s ease;
 }
 
 .annotation-container.pane-open {
-  width: 70%; /* 打開滑動面板時主畫面寬度變為70% */
-  margin-right: 30%; /* 留出30%的空間給滑動面板 */
+  width: 70%;
+  margin-right: 30%;
+}
+
+.toolbar {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .image-display {
@@ -15,7 +24,7 @@
   justify-content: center;
   align-items: center;
   gap: 20px;
-  width: 100%; /* 主畫面寬度為100%，當滑動面板打開時寬度會自動變為70% */
+  width: 100%;
   margin: 0 auto;
 }
 
@@ -29,7 +38,7 @@
 }
 
 #annotationCanvas {
-  position: absolute;
+  position: relative;
   top: 0;
   left: 0;
   z-index: 1;

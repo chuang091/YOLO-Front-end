@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import SlidingPane from 'react-sliding-pane';
 import 'react-sliding-pane/dist/react-sliding-pane.css';
 import './Annotation.css';
+import PolygonDrawer from './PolygonDrawer';
 
 const classColors = {
   "0": "rgba(255, 0, 0, 0.5)",
@@ -40,9 +41,13 @@ function Annotation() {
   };
 
   const drawAnnotations = (canvas, imageId) => {
-    if (!annotations) return; // 防止annotations未定義
+    if (!annotations) return;
     const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (!ctx) return;
+    const img = document.getElementById('baseImage');
+    if (img) {
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    }
     const imageAnnotations = annotations.filter(annotation => annotation.image_id === imageId);
 
     imageAnnotations.forEach(annotation => {
@@ -68,13 +73,16 @@ function Annotation() {
   useEffect(() => {
     if (currentImage) {
       const img = new Image();
+      img.id = 'baseImage';
       img.src = `data:image/jpeg;base64,${currentImage.data}`;
       img.onload = () => {
         const canvas = document.getElementById('annotationCanvas');
+        if (!canvas) return;
         const ctx = canvas.getContext('2d');
+        if (!ctx) return;
         canvas.width = img.width;
         canvas.height = img.height;
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // 清理畫布
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(img, 0, 0, img.width, img.height);
         drawAnnotations(canvas, currentImageId);
       };
@@ -83,6 +91,11 @@ function Annotation() {
 
   return (
     <div className={`annotation-container ${isPaneOpen ? 'pane-open' : ''}`}>
+      <div className="toolbar">
+        <PolygonDrawer canvasId="annotationCanvas" imageId={currentImageId} />
+        <button>SAM model</button>
+        <button>YOLO model</button>
+      </div>
       <button onClick={handleBack} className="back-button">回到上一頁</button>
       <button onClick={() => setIsPaneOpen(true)} className="annotations-button">查看標記</button>
       {currentImage ? (
@@ -90,7 +103,7 @@ function Annotation() {
           <button onClick={handlePrevious}>上一張</button>
           <div className="canvas-container">
             <canvas id="annotationCanvas"></canvas>
-            <img src={`data:image/jpeg;base64,${currentImage.data}`} alt={currentImage.filename} className="annotation-image" />
+            <img id="baseImage" src={`data:image/jpeg;base64,${currentImage.data}`} alt={currentImage.filename} className="annotation-image" style={{ display: 'none' }} />
           </div>
           <button onClick={handleNext}>下一張</button>
         </div>
