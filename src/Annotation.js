@@ -27,6 +27,7 @@ function Annotation() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaneOpen, setIsPaneOpen] = useState(false);
   const [hoveredAnnotation, setHoveredAnnotation] = useState(null);
+  const [polygonClass, setPolygonClass] = useState(1); // 默认类型为 1
 
   const handlePrevious = () => {
     setCurrentIndex((prevIndex) => (prevIndex === 0 ? selectedImages.length - 1 : prevIndex - 1));
@@ -46,6 +47,7 @@ function Annotation() {
     if (!ctx) return;
     const img = document.getElementById('baseImage');
     if (img) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     }
     const imageAnnotations = annotations.filter(annotation => annotation.image_id === imageId);
@@ -87,12 +89,26 @@ function Annotation() {
         drawAnnotations(canvas, currentImageId);
       };
     }
-  }, [currentIndex, currentImageId, hoveredAnnotation]);
+  }, [currentIndex, currentImageId, hoveredAnnotation, annotations]);
+
+  const handleClassChange = (e) => {
+    setPolygonClass(Number(e.target.getAttribute('data-ptype')));
+    document.querySelectorAll('.ptype').forEach(li => li.classList.remove('active'));
+    e.target.parentElement.classList.add('active');
+  };
 
   return (
     <div className={`annotation-container ${isPaneOpen ? 'pane-open' : ''}`}>
       <div className="toolbar">
-        <PolygonDrawer canvasId="annotationCanvas" imageId={currentImageId} />
+        <ul className="pagination" id="pagination">
+          <li className="ptype active" data-ptype="1"><button className="ptypeBtn" data-ptype="1" onClick={handleClassChange}>聚落</button></li>
+          <li className="ptype" data-ptype="2"><button className="ptypeBtn" data-ptype="2" onClick={handleClassChange}>田地</button></li>
+          <li className="ptype" data-ptype="3"><button className="ptypeBtn" data-ptype="3" onClick={handleClassChange}>草地</button></li>
+          <li className="ptype" data-ptype="4"><button className="ptypeBtn" data-ptype="4" onClick={handleClassChange}>墓地</button></li>
+          <li className="ptype" data-ptype="5"><button className="ptypeBtn" data-ptype="5" onClick={handleClassChange}>荒地</button></li>
+          <li className="ptype" data-ptype="6"><button className="ptypeBtn" data-ptype="6" onClick={handleClassChange}>茶園</button></li>
+        </ul>
+        <PolygonDrawer canvasId="annotationCanvas" imageId={currentImageId} existingAnnotations={currentAnnotations} polygonClass={polygonClass} />
         <button>SAM model</button>
         <button>YOLO model</button>
       </div>

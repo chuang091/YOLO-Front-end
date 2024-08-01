@@ -81,6 +81,33 @@ button:hover {
   right: 10px;
 }
 
+.pagination {
+  display: flex;
+  justify-content: center;
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+}
+
+.pagination > .ptype > .ptypeBtn {
+  display: block;
+  padding: 10px 15px;
+  margin-left: -1px;
+  line-height: 1.42857143;
+  color: #337ab7;
+  text-decoration: none;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  cursor: pointer;
+}
+
+.pagination > .ptype.active > .ptypeBtn {
+  z-index: 2;
+  color: #fff;
+  background-color: #337ab7;
+  border-color: #337ab7;
+}
+
 .annotation-list {
   list-style-type: none;
   padding: 0;
