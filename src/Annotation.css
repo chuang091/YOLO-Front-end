@@ -147,3 +147,34 @@ button:hover {
 .delete-button i {
   font-size: 18px;
 }
+
+.page-info {
+  margin-top: 20px;
+  font-size: 18px;
+}
+
+.progress-container {
+  margin-top: 10px;
+  height: 20px;
+  width: 100%;
+  background-color: #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-bar {
+  height: 100%;
+  background-color: #76c7c0;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #333;
+  font-size: 14px;
+  line-height: 20px;
+}

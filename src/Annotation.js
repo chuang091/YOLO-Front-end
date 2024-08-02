@@ -24,6 +24,16 @@ const classColors = {
   "10": "rgba(0, 128, 128, 0.5)"
 };
 
+const setImage = (imageData, imageName) => {
+  return fetch('http://localhost:5500/set_image2', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ image_data: imageData, image_name: imageName }),
+  });
+};
+
 function Annotation() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -34,6 +44,8 @@ function Annotation() {
   const [polygonClass, setPolygonClass] = useState(1);
   const [isDrawing, setIsDrawing] = useState(false); // 控制繪製多邊形模式
   const [isSamModel, setIsSamModel] = useState(false); // 控制 SAM 模式
+  const [progress, setProgress] = useState(0); // 進度條進度
+  const [progressStatus, setProgressStatus] = useState("處理中..."); // 進度條狀態
 
   const handlePrevious = () => {
     setCurrentIndex((prevIndex) => (prevIndex === 0 ? selectedImages.length - 1 : prevIndex - 1));
@@ -130,6 +142,23 @@ function Annotation() {
     }
   };
 
+  const processAllImages = async () => {
+    for (let i = 0; i < selectedImages.length; i++) {
+      const image = images.find(img => img._id === selectedImages[i]);
+      if (image) {
+        console.log(`處理圖片: ${image.filename}`);
+        await setImage(image.data, image.filename);
+        console.log(`已設定圖片: ${image.filename}`);
+        setProgress(((i + 1) / selectedImages.length) * 100);
+      }
+    }
+    setProgressStatus("已完成");
+  };
+
+  useEffect(() => {
+    processAllImages();
+  }, [selectedImages, images]);
+
   return (
     <div className={`annotation-container ${isPaneOpen ? 'pane-open' : ''}`}>
       <div className="toolbar">
@@ -160,6 +189,10 @@ function Annotation() {
       )}
       <div className="page-info">
         {currentIndex + 1} / {selectedImages.length}
+        <div className="progress-container">
+          <div className="progress-bar" style={{ width: `${progress}%` }}></div>
+          <div className="progress-text">{progressStatus}</div>
+        </div>
       </div>
       <SlidingPane
         isOpen={isPaneOpen}
