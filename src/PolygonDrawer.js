@@ -2,9 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const PolygonDrawer = ({ canvasId, imageId, existingAnnotations, polygonClass }) => {
+const PolygonDrawer = ({ canvasId, imageId, existingAnnotations, polygonClass, isDrawing }) => {
   const [points, setPoints] = useState([]);
-  const [isDrawing, setIsDrawing] = useState(false);
   const [allPolygons, setAllPolygons] = useState([]);
 
   const classColors = {
@@ -17,7 +16,7 @@ const PolygonDrawer = ({ canvasId, imageId, existingAnnotations, polygonClass })
     "6": "rgba(128, 0, 0, 0.5)",
     "7": "rgba(0, 128, 0, 0.5)",
     "8": "rgba(0, 0, 128, 0.5)",
-    "9": "rgba(128, 128, 0, 0.5)",
+    "9": "rgba(128, 128, 0.5)",
     "10": "rgba(0, 128, 128, 0.5)"
   };
 
@@ -117,7 +116,7 @@ const PolygonDrawer = ({ canvasId, imageId, existingAnnotations, polygonClass })
     const data = {
       image_id: imageId,
       coordinates: points.flat(),
-      class: polygonClass-1
+      class: polygonClass - 1
     };
     axios.post('http://localhost:5500/api/annotations', data)
       .then(response => {
@@ -156,11 +155,7 @@ const PolygonDrawer = ({ canvasId, imageId, existingAnnotations, polygonClass })
     };
   }, [isDrawing, points, allPolygons]);
 
-  return (
-    <button onClick={() => setIsDrawing(!isDrawing)}>
-      {isDrawing ? '停止繪製多邊形' : '繪製多邊形'}
-    </button>
-  );
+  return null; // 不再返回按钮
 };
 
 export default PolygonDrawer;

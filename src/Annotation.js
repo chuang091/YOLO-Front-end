@@ -5,6 +5,7 @@ import SlidingPane from 'react-sliding-pane';
 import 'react-sliding-pane/dist/react-sliding-pane.css';
 import './Annotation.css';
 import PolygonDrawer from './PolygonDrawer';
+import Sam from './Sam';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';  
@@ -19,7 +20,7 @@ const classColors = {
   "6": "rgba(128, 0, 0, 0.5)",
   "7": "rgba(0, 128, 0, 0.5)",
   "8": "rgba(0, 0, 128, 0.5)",
-  "9": "rgba(128, 128, 0, 0.5)",
+  "9": "rgba(128, 128, 0.5)",
   "10": "rgba(0, 128, 128, 0.5)"
 };
 
@@ -30,7 +31,9 @@ function Annotation() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaneOpen, setIsPaneOpen] = useState(false);
   const [hoveredAnnotation, setHoveredAnnotation] = useState(null);
-  const [polygonClass, setPolygonClass] = useState(1); // 默认类型为 1
+  const [polygonClass, setPolygonClass] = useState(1);
+  const [isDrawing, setIsDrawing] = useState(false); // 控制繪製多邊形模式
+  const [isSamModel, setIsSamModel] = useState(false); // 控制 SAM 模式
 
   const handlePrevious = () => {
     setCurrentIndex((prevIndex) => (prevIndex === 0 ? selectedImages.length - 1 : prevIndex - 1));
@@ -113,6 +116,20 @@ function Annotation() {
       });
   };
 
+  const handleToggleDrawing = () => {
+    setIsDrawing(!isDrawing);
+    if (!isDrawing) {
+      setIsSamModel(false); // 禁用 SAM 模式
+    }
+  };
+
+  const handleToggleSamModel = () => {
+    setIsSamModel(!isSamModel);
+    if (!isSamModel) {
+      setIsDrawing(false); // 禁用繪製多邊形模式
+    }
+  };
+
   return (
     <div className={`annotation-container ${isPaneOpen ? 'pane-open' : ''}`}>
       <div className="toolbar">
@@ -124,9 +141,8 @@ function Annotation() {
           <li className="ptype" data-ptype="5"><button className="ptypeBtn" data-ptype="5" onClick={handleClassChange}>荒地</button></li>
           <li className="ptype" data-ptype="6"><button className="ptypeBtn" data-ptype="6" onClick={handleClassChange}>茶園</button></li>
         </ul>
-        <PolygonDrawer canvasId="annotationCanvas" imageId={currentImageId} existingAnnotations={currentAnnotations} polygonClass={polygonClass} />
-        <button>SAM model</button>
-        <button>YOLO model</button>
+        <button onClick={handleToggleDrawing}>{isDrawing ? '停止繪製多邊形' : '繪製多邊形'}</button>
+        <button onClick={handleToggleSamModel}>{isSamModel ? '停止 SAM 模式' : '啟動 SAM 模式'}</button>
       </div>
       <button onClick={handleBack} className="back-button">回到上一頁</button>
       <button onClick={() => setIsPaneOpen(true)} className="annotations-button">查看標記</button>
@@ -163,12 +179,14 @@ function Annotation() {
             >
               類別: {annotation.class}, ID: {annotation._id}
               <button className="delete-button" onClick={() => handleDeleteAnnotation(annotation._id)}>
-              <FontAwesomeIcon icon={faTrash} />
+                <FontAwesomeIcon icon={faTrash} />
               </button>
             </li>
           ))}
         </ul>
       </SlidingPane>
+      <PolygonDrawer canvasId="annotationCanvas" imageId={currentImageId} existingAnnotations={currentAnnotations} polygonClass={polygonClass} isDrawing={isDrawing} />
+      <Sam canvasId="annotationCanvas" imageId={currentImageId} existingAnnotations={currentAnnotations} isSamModel={isSamModel} />
     </div>
   );
 }

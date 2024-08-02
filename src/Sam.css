@@ -1,0 +1,10 @@
+/* src/Sam.css */
+.segment-mark {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 100;
+  }
+  
