@@ -44,7 +44,7 @@ const PolygonDrawer = ({ canvasId, imageId, existingAnnotations, polygonClass, i
           ctx.lineTo(polygon.points[i][0] * canvas.width, polygon.points[i][1] * canvas.height);
         }
         ctx.closePath();
-        ctx.fillStyle = 'rgba(0, 0, 255, 0.3)';
+        ctx.fillStyle = classColors[polygonClass-1];
         ctx.fill();
         ctx.strokeStyle = 'blue';
         ctx.lineWidth = 2;
@@ -59,7 +59,7 @@ const PolygonDrawer = ({ canvasId, imageId, existingAnnotations, polygonClass, i
           ctx.lineTo(points[i][0] * canvas.width, points[i][1] * canvas.height);
         }
         ctx.closePath();
-        ctx.fillStyle = 'rgba(0, 0, 255, 0.3)';
+        ctx.fillStyle = classColors[polygonClass-1];
         ctx.fill();
         ctx.strokeStyle = 'blue';
         ctx.lineWidth = 2;

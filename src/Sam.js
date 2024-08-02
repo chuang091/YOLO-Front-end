@@ -2,10 +2,10 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const Sam = ({ canvasId, imageId, existingAnnotations, isSamModel }) => {
+const Sam = ({ canvasId, imageId, existingAnnotations, isSamModel, polygonClass }) => {
   const [points, setPoints] = useState([]);
   const [actions, setActions] = useState([]);
-  const [samResult, setSamResult] = useState(null);
+  const [samResult, setSamResult] = useState();
 
   const classColors = {
     "0": "rgba(255, 0, 0, 0.5)",
@@ -42,7 +42,8 @@ const Sam = ({ canvasId, imageId, existingAnnotations, isSamModel }) => {
           ctx.lineTo(samResult[i][0] , samResult[i][1] );
         }
         ctx.closePath();
-        ctx.fillStyle = 'rgba(0, 255, 0, 0.3)';
+        //console.log('samResult:', samResult);
+        ctx.fillStyle = classColors[polygonClass-1];
         ctx.fill();
       }
 
