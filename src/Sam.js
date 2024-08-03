@@ -5,7 +5,7 @@ import axios from 'axios';
 const Sam = ({ canvasId, imageId, existingAnnotations, isSamModel, polygonClass }) => {
   const [points, setPoints] = useState([]);
   const [actions, setActions] = useState([]);
-  const [samResult, setSamResult] = useState();
+  const [samResult, setSamResult] = useState([]);
 
   const classColors = {
     "0": "rgba(255, 0, 0, 0.5)",
@@ -35,21 +35,22 @@ const Sam = ({ canvasId, imageId, existingAnnotations, isSamModel, polygonClass 
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
       }
 
-      if (samResult) {
+      if (samResult.length > 0) {
         ctx.beginPath();
-        ctx.moveTo(samResult[0][0] , samResult[0][1] );
+        ctx.moveTo(samResult[0][0], samResult[0][1]);
         for (let i = 1; i < samResult.length; i++) {
-          ctx.lineTo(samResult[i][0] , samResult[i][1] );
+          ctx.lineTo(samResult[i][0], samResult[i][1]);
         }
         ctx.closePath();
-        //console.log('samResult:', samResult);
-        ctx.fillStyle = classColors[polygonClass-1];
+        ctx.fillStyle = classColors[polygonClass - 1];
         ctx.fill();
+      } else {
+        console.log('samResult is empty');
       }
 
       points.forEach((point, index) => {
         ctx.beginPath();
-        ctx.arc(point[0], point[1] , 3, 0, 2 * Math.PI);
+        ctx.arc(point[0], point[1], 3, 0, 2 * Math.PI);
         ctx.fillStyle = actions[index] === 1 ? 'green' : 'red';
         ctx.fill();
       });
@@ -60,10 +61,9 @@ const Sam = ({ canvasId, imageId, existingAnnotations, isSamModel, polygonClass 
         ctx.fillStyle = color;
         const coords = annotation.coordinates;
         if (coords.length >= 4) {
-          ctx.moveTo(coords[0]*canvas.width, coords[1]*canvas.height);
- 
-            for (let i = 2; i < coords.length; i += 2) {
-            ctx.lineTo(coords[i]*canvas.width, coords[i + 1]*canvas.height );
+          ctx.moveTo(coords[0] * canvas.width, coords[1] * canvas.height);
+          for (let i = 2; i < coords.length; i += 2) {
+            ctx.lineTo(coords[i] * canvas.width, coords[i + 1] * canvas.height);
           }
           ctx.closePath();
           ctx.fill();
@@ -72,32 +72,70 @@ const Sam = ({ canvasId, imageId, existingAnnotations, isSamModel, polygonClass 
     };
 
     drawSamResult();
-  }, [points, actions, samResult, existingAnnotations, imageId]);
+  }, [points, actions, samResult, existingAnnotations, imageId, polygonClass]);
 
-  const handleCanvasClick = (e) => {
+  const handleCanvasClick = async (e) => {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
-    
+
     const rect = canvas.getBoundingClientRect();
     const x = (e.clientX - rect.left);
     const y = (e.clientY - rect.top);
 
     const newPoints = [...points, [x, y]];
     const newActions = [...actions, e.button === 2 ? 0 : 1]; // 右鍵紅色（0），左鍵綠色（1）
-    console.log(newPoints, newActions);
     setPoints(newPoints);
     setActions(newActions);
 
-
-    sendSamRequest(newPoints, newActions);
+    const data = await sendSamRequest(newPoints, newActions);
+    setSamResult(data);
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyPress = async (e) => {
     if (e.key === 'Escape') {
-      setPoints([]);
-      setActions([]);
-      setSamResult(null);
-      document.querySelectorAll('.segment-point').forEach(e => e.remove());
+      clearAll();
+    }
+    if (e.key === ' ') {
+      if (points.length > 0) {
+        const data = await sendSamRequest(points, actions); // 确保获取最新的 samResult
+        await saveAnnotation(data);
+        clearAll();
+      } else {
+        console.log('No points to save');
+      }
+    }
+  };
+
+  const clearAll = () => {
+    setPoints([]);
+    setActions([]);
+    setSamResult([]);
+    document.querySelectorAll('.segment-point').forEach(e => e.remove());
+  };
+
+  const saveAnnotation = async (samResultToSave) => {
+    if (!samResultToSave || samResultToSave.length === 0) {
+      console.log('No samResult to save');
+      return;
+    }
+
+    const canvas = document.getElementById(canvasId);
+    const normalizedResult = samResultToSave.map(([x, y]) => [x / canvas.width, y / canvas.height]);
+
+    const data = {
+      image_id: imageId,
+      coordinates: normalizedResult.flat(),
+      class: polygonClass-1
+    };
+    console.log('Saving annotation:', data);
+
+    try {
+      const response = await axios.post('http://localhost:5500/api/annotations', data);
+      console.log('Annotation saved:', response.data);
+      return response.data;  // 返回 Promise
+    } catch (error) {
+      console.error('Error saving annotation:', error);
+      throw error;  // 拋出錯誤以便調用處理
     }
   };
 
@@ -107,7 +145,7 @@ const Sam = ({ canvasId, imageId, existingAnnotations, isSamModel, polygonClass 
     const coordinatesJson = JSON.stringify(newPoints);
     const actionJson = JSON.stringify(newActions);
 
-    fetch('http://localhost:5500/sam', {
+    return fetch('http://localhost:5500/sam', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -117,10 +155,11 @@ const Sam = ({ canvasId, imageId, existingAnnotations, isSamModel, polygonClass 
       .then(response => response.json())
       .then(data => {
         console.log('Sam result:', data);
-        setSamResult(data);
+        return data;
       })
       .catch(error => {
         console.error('Error:', error);
+        throw error;
       });
   };
 
