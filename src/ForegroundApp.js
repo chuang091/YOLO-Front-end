@@ -49,7 +49,7 @@ function ForegroundApp() {
     "6": "rgba(128, 0, 0, 0.5)",
     "7": "rgba(0, 128, 0, 0.5)",
     "8": "rgba(0, 0, 128, 0.5)",
-    "9": "rgba(128, 128, 0, 0.5)",
+    "9": "rgba(128, 128, 0.5)",
     "10": "rgba(0, 128, 128, 0.5)"
   };
 
@@ -136,6 +136,8 @@ function ForegroundApp() {
     });
   };
 
+  const annotatedImageCount = images.filter(image => annotations.some(annotation => annotation.image_id === image._id)).length;
+
   return (
     <div className="App">
       <div className="header">
@@ -145,6 +147,10 @@ function ForegroundApp() {
         <button onClick={handleNavigateToAnnotation} disabled={selectedImages.size === 0}>
           前往標記頁面
         </button>
+        <div className="stats">
+          <p>總圖片數量: {images.length}</p>
+          <p>帶標記的圖片數量: {annotatedImageCount}</p>
+        </div>
       </div>
       {isDataLoaded ? (
         <div className="image-gallery">
