@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route, Routes, NavLink } from 'react-router-do
 import ForegroundApp from './ForegroundApp'; // 確保路徑正確
 import BackgroundApp from './BackgroundApp'; // 確保路徑正確
 import Annotation from './Annotation';
+import Dashboard from './Dashboard';
 import './App.css';
 
 function MainApp() {
@@ -22,12 +23,18 @@ function MainApp() {
                 背景圖片
               </NavLink>
             </li>
+            <li>
+              <NavLink to="/Dashboard" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                Dashboard
+              </NavLink>
+            </li>
           </ul>
         </nav>
         <Routes>
           <Route path="/" element={<ForegroundApp />} />
           <Route path="/background" element={<BackgroundApp />} />
           <Route path="/annotation" element={<Annotation />} />
+          <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       </div>
     </Router>

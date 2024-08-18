@@ -169,6 +169,9 @@ function Annotation() {
           <li className="ptype" data-ptype="4"><button className="ptypeBtn" data-ptype="4" onClick={handleClassChange}>墓地</button></li>
           <li className="ptype" data-ptype="5"><button className="ptypeBtn" data-ptype="5" onClick={handleClassChange}>荒地</button></li>
           <li className="ptype" data-ptype="6"><button className="ptypeBtn" data-ptype="6" onClick={handleClassChange}>茶園</button></li>
+          <li className="ptype" data-ptype="7"><button className="ptypeBtn" data-ptype="7" onClick={handleClassChange}>樹林</button></li>
+          <li className="ptype" data-ptype="8"><button className="ptypeBtn" data-ptype="8" onClick={handleClassChange}>竹林</button></li>
+          <li className="ptype" data-ptype="9"><button className="ptypeBtn" data-ptype="9" onClick={handleClassChange}>旱地</button></li>
         </ul>
         <button onClick={handleToggleDrawing}>{isDrawing ? '停止繪製多邊形' : '繪製多邊形'}</button>
         <button onClick={handleToggleSamModel}>{isSamModel ? '停止 SAM 模式' : '啟動 SAM 模式'}</button>
