@@ -6,10 +6,10 @@ import 'react-sliding-pane/dist/react-sliding-pane.css';
 import './Annotation.css';
 import PolygonDrawer from './PolygonDrawer';
 import Sam from './Sam';
+import ObjectDetection from './ObjectDetection';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
-import { performObjectDetection } from './ObjectDetection'; // 引入物體檢測功能
 
 const classColors = {
   "0": "rgba(255, 0, 0, 0.5)",
@@ -33,6 +33,18 @@ const setImage = (imageData, imageName) => {
     },
     body: JSON.stringify({ image_data: imageData, image_name: imageName }),
   });
+};
+
+const globalDetectionResults = {}; // 全局字典
+
+const objectDetection = async (imageData, imageName, imageID) => {
+  const requestData = {
+    image_name: imageName,
+    image_data: `data:image/jpeg;base64,${imageData}`
+  };
+  const response = await axios.post('http://localhost:5500/process_image_od', requestData);
+  globalDetectionResults[imageID] = response.data; // 存儲偵測結果到全局字典
+  console.log(`Object detection result for image ID: ${imageName}`, response.data);
 };
 
 function Annotation() {
@@ -87,6 +99,7 @@ function Annotation() {
       }
     });
   };
+  
 
   const currentImageId = selectedImages[currentIndex];
   const currentImage = images.find(image => image._id === currentImageId);
@@ -116,6 +129,16 @@ function Annotation() {
     document.querySelectorAll('.ptype').forEach(li => li.classList.remove('active'));
     e.target.parentElement.classList.add('active');
   };
+  const handleToggleObjectDetection = () => {
+    setIsObjectDetectionEnabled(!isObjectDetectionEnabled);
+    if (!isObjectDetectionEnabled) {
+      const detectionCanvas = document.getElementById('detectionCanvas');
+      if (detectionCanvas) {
+        const detectionCtx = detectionCanvas.getContext('2d');
+        detectionCtx.clearRect(0, 0, detectionCanvas.width, detectionCanvas.height); // 清除畫布
+      }
+    }
+  };
 
   const handleDeleteAnnotation = (id) => {
     axios.delete(`http://localhost:5500/api/annotations/${id}`)
@@ -144,11 +167,6 @@ function Annotation() {
     }
   };
 
-  const handleToggleObjectDetection = () => {
-    setIsObjectDetectionEnabled(!isObjectDetectionEnabled);
-    alert(`Object Detection ${!isObjectDetectionEnabled ? 'enabled' : 'disabled'}`);
-  };
-
   const processAllImages = async () => {
     for (let i = 0; i < selectedImages.length; i++) {
       const image = images.find(img => img._id === selectedImages[i]);
@@ -156,11 +174,11 @@ function Annotation() {
         console.log(`處理圖片: ${image.filename}`);
         await setImage(image.data, image.filename);
         console.log(`已設定圖片: ${image.filename}`);
+        await objectDetection(image.data, image.filename,image._id);
+        console.log(`已檢測物體: ${image.filename}`);
         setProgress(((i + 1) / selectedImages.length) * 100);
 
-        if (isObjectDetectionEnabled) {
-          performObjectDetection(image._id,image.data); // 執行物體檢測
-        }
+        
       }
     }
     setProgressStatus("已完成");
@@ -168,7 +186,7 @@ function Annotation() {
 
   useEffect(() => {
     processAllImages();
-  }, [selectedImages, images, isObjectDetectionEnabled]);
+  }, [selectedImages, images]);
 
   return (
     <div className={`annotation-container ${isPaneOpen ? 'pane-open' : ''}`}>
@@ -200,6 +218,7 @@ function Annotation() {
         <div className="image-display">
           <button onClick={handlePrevious}>上一張</button>
           <div className="canvas-container">
+          <canvas id="detectionCanvas"></canvas>
             <canvas id="annotationCanvas"></canvas>
             <img id="baseImage" src={`data:image/jpeg;base64,${currentImage.data}`} alt={currentImage.filename} className="annotation-image" style={{ display: 'none' }} />
           </div>
@@ -241,6 +260,7 @@ function Annotation() {
       </SlidingPane>
       <PolygonDrawer canvasId="annotationCanvas" imageId={currentImageId} existingAnnotations={currentAnnotations} polygonClass={polygonClass} isDrawing={isDrawing} />
       <Sam canvasId="annotationCanvas" imageId={currentImageId} existingAnnotations={currentAnnotations} isSamModel={isSamModel} polygonClass={polygonClass} />
+      <ObjectDetection canvasId="detectionCanvas" imageId={currentImageId} imageData={currentImage.data} isObjectDetectionEnabled={isObjectDetectionEnabled}  detectionResults={globalDetectionResults} />
     </div>
   );
 }
