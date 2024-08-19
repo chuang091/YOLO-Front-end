@@ -178,3 +178,50 @@ button:hover {
   font-size: 14px;
   line-height: 20px;
 }
+/* src/Annotation.css */
+.ios-switch label {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.ios-switch input {
+  display: none;
+}
+
+.slider {
+  position: relative;
+  width: 60px; /* 增加開關的寬度 */
+  height: 28px; /* 增加開關的高度 */
+  background-color: #ccc;
+  border-radius: 28px; /* 根據高度自動調整圓角 */
+  transition: 0.4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 24px; /* 增加圓點的高度 */
+  width: 24px;  /* 增加圓點的寬度 */
+  border-radius: 50%;
+  background-color: white;
+  top: 2px;  /* 調整圓點的位置 */
+  left: 2px; /* 調整圓點的位置 */
+  transition: 0.4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:checked + .slider:before {
+  transform: translateX(32px); /* 調整圓點的移動距離 */
+}
+
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}

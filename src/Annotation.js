@@ -8,7 +8,8 @@ import PolygonDrawer from './PolygonDrawer';
 import Sam from './Sam';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash } from '@fortawesome/free-solid-svg-icons';  
+import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import { performObjectDetection } from './ObjectDetection'; // 引入物體檢測功能
 
 const classColors = {
   "0": "rgba(255, 0, 0, 0.5)",
@@ -44,6 +45,7 @@ function Annotation() {
   const [polygonClass, setPolygonClass] = useState(1);
   const [isDrawing, setIsDrawing] = useState(false); // 控制繪製多邊形模式
   const [isSamModel, setIsSamModel] = useState(false); // 控制 SAM 模式
+  const [isObjectDetectionEnabled, setIsObjectDetectionEnabled] = useState(false); // 控制物體檢測
   const [progress, setProgress] = useState(0); // 進度條進度
   const [progressStatus, setProgressStatus] = useState("處理中..."); // 進度條狀態
 
@@ -142,6 +144,11 @@ function Annotation() {
     }
   };
 
+  const handleToggleObjectDetection = () => {
+    setIsObjectDetectionEnabled(!isObjectDetectionEnabled);
+    alert(`Object Detection ${!isObjectDetectionEnabled ? 'enabled' : 'disabled'}`);
+  };
+
   const processAllImages = async () => {
     for (let i = 0; i < selectedImages.length; i++) {
       const image = images.find(img => img._id === selectedImages[i]);
@@ -150,6 +157,10 @@ function Annotation() {
         await setImage(image.data, image.filename);
         console.log(`已設定圖片: ${image.filename}`);
         setProgress(((i + 1) / selectedImages.length) * 100);
+
+        if (isObjectDetectionEnabled) {
+          performObjectDetection(image._id,image.data); // 執行物體檢測
+        }
       }
     }
     setProgressStatus("已完成");
@@ -157,7 +168,7 @@ function Annotation() {
 
   useEffect(() => {
     processAllImages();
-  }, [selectedImages, images]);
+  }, [selectedImages, images, isObjectDetectionEnabled]);
 
   return (
     <div className={`annotation-container ${isPaneOpen ? 'pane-open' : ''}`}>
@@ -175,6 +186,13 @@ function Annotation() {
         </ul>
         <button onClick={handleToggleDrawing}>{isDrawing ? '停止繪製多邊形' : '繪製多邊形'}</button>
         <button onClick={handleToggleSamModel}>{isSamModel ? '停止 SAM 模式' : '啟動 SAM 模式'}</button>
+          <div className="ios-switch">
+            <label>
+              物體檢測   
+              <input type="checkbox" checked={isObjectDetectionEnabled} onChange={handleToggleObjectDetection} />
+              <span className="slider round"></span>
+            </label>
+          </div>
       </div>
       <button onClick={handleBack} className="back-button">回到上一頁</button>
       <button onClick={() => setIsPaneOpen(true)} className="annotations-button">查看標記</button>
