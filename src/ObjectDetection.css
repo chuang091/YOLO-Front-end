@@ -1,0 +1,6 @@
+.detection-rectangle {
+    position: absolute;
+    border: 2px solid;
+    box-sizing: border-box;
+    cursor: pointer;
+}

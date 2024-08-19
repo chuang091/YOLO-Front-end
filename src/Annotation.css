@@ -226,11 +226,12 @@ input:checked + .slider:before {
   border-radius: 50%;
 }
 
-#detectionCanvas {
+#detectionContainer {
   position: absolute;
   width: 512px;
   height: 512px;
   top: 0;
   left: 0;
-  z-index: 1001;
+  z-index: 10;
+  pointer-events: none;
 }

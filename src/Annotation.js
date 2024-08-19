@@ -217,8 +217,9 @@ function Annotation() {
       {currentImage ? (
         <div className="image-display">
           <button onClick={handlePrevious}>上一張</button>
+          
           <div className="canvas-container">
-          <canvas id="detectionCanvas"></canvas>
+          <div id="detectionContainer" className="image-display"></div>
             <canvas id="annotationCanvas"></canvas>
             <img id="baseImage" src={`data:image/jpeg;base64,${currentImage.data}`} alt={currentImage.filename} className="annotation-image" style={{ display: 'none' }} />
           </div>
@@ -260,7 +261,17 @@ function Annotation() {
       </SlidingPane>
       <PolygonDrawer canvasId="annotationCanvas" imageId={currentImageId} existingAnnotations={currentAnnotations} polygonClass={polygonClass} isDrawing={isDrawing} />
       <Sam canvasId="annotationCanvas" imageId={currentImageId} existingAnnotations={currentAnnotations} isSamModel={isSamModel} polygonClass={polygonClass} />
-      <ObjectDetection canvasId="detectionCanvas" imageId={currentImageId} imageData={currentImage.data} isObjectDetectionEnabled={isObjectDetectionEnabled}  detectionResults={globalDetectionResults} />
+      
+
+    <ObjectDetection
+        containerId="detectionContainer"
+        imageId={currentImageId}
+        imageName={currentImage.filename}
+        imageData={currentImage.data}
+        isObjectDetectionEnabled={isObjectDetectionEnabled}
+        detectionResults={globalDetectionResults}
+    />
+
     </div>
   );
 }
