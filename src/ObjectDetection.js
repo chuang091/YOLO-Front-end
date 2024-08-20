@@ -31,8 +31,6 @@ function ObjectDetection({ containerId, imageId, imageName, imageData, isObjectD
                 const height = `${(point.y2 - point.y1) * 100}%`;
                 const left = `${point.x1 * 100}%`;
                 const top = `${point.y1 * 100}%`;
-
-                // 创建矩形 div
                 const rectDiv = document.createElement('div');
                 rectDiv.className = 'detection-rectangle';
                 rectDiv.style.width = width;
@@ -42,21 +40,47 @@ function ObjectDetection({ containerId, imageId, imageName, imageData, isObjectD
                 rectDiv.style.backgroundColor = classColors[result["class"]] || 'rgba(255, 255, 255, 0.5)';
                 rectDiv.style.borderColor = classColors[result["class"]] || 'rgba(255, 255, 255, 0.5)';
                 rectDiv.style.pointerEvents = 'auto';
-
-                // 处理双击事件
                 rectDiv.ondblclick = async () => {
                     rectDiv.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
                     rectDiv.style.borderColor = 'black';
+                    /*
+                    @bp.route('/api/annotations', methods=['POST'])
+                        def add_annotation():
+                            data = request.json
+                            annotation = {
+                                'image_id': data['image_id'],
+                                'coordinates': data['coordinates'],
+                                'class': data['class']
+                            }
+                            print(annotation)
+                            result = annotations_col.insert_one(annotation)
+                            annotation['_id'] = str(result.inserted_id)
+                            return jsonify(annotation), 201*/
 
-                    // 保存该对象的标注数据
-                    const data = `${result.class} ${result.box.x1} ${result.box.y1} ${result.box.x2} ${result.box.y2}`;
-                    const formData = new FormData();
-                    formData.append('data', data);
-                    formData.append('imageName', imageName);
+                    //建立一個映射 field , grass, wasteland, grave, tree, bamboo, dryland, tea
+                    //reverse class map
+                    const classMap = {
+                            "0": "1",
+                            "1": "2",
+                            "2": "4",
+                            "3": "3",
+                            "4": "6",
+                            "5": "7",
+                            "6": "8",
+                            "7": "5"
+                        };
+
+                    
+
 
                     try {
-                        await axios.post('http://localhost:5500/save-polygon-data', formData);
-                        alert('Annotation saved successfully');
+                        const response = await axios.post('http://localhost:5500/api/annotations', {
+                            image_id: imageId,
+                            coordinates: [point.x1,point.y1,point.x2,point.y1,point.x2,point.y2,point.x1,point.y2],
+                            // call class map result["name"] to get the class name
+                            class: classMap[result["class"]] || 'unknown'
+                        });
+                        console.log('Annotation saved:', response.data);
                     } catch (error) {
                         console.error('Error saving annotation:', error);
                     }
