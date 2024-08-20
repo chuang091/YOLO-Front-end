@@ -6,6 +6,14 @@ function ObjectDetection({ containerId, imageId, imageName, imageData, isObjectD
     useEffect(() => {
         const container = document.getElementById(containerId);
         if (!container) return;
+        // detectionResults[imageId] is null, return
+        // detectionResults[imageId].forEach is not a function
+        // avoid
+        if (!Array.isArray(detectionResults[imageId])) return;
+        
+
+
+        if (!detectionResults[imageId]) return;
 
         const classColors = {
             "0": "rgba(255, 0, 0, 0.5)",
@@ -23,7 +31,8 @@ function ObjectDetection({ containerId, imageId, imageName, imageData, isObjectD
 
         // 清空之前的矩形
         container.innerHTML = '';
-
+        // set time out
+        // 1. 1s
         if (isObjectDetectionEnabled && detectionResults[imageId]) {
             detectionResults[imageId].forEach((result, index) => {
                 const point = result["box"];
