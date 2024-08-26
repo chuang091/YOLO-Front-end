@@ -1,5 +1,5 @@
 # YOLO Annotation System
-![image](https://github.com/user-attachments/assets/ea08ab59-bbbc-4285-82e9-d46c7fa655e6)
+![System](https://github.com/user-attachments/assets/18bd6512-9f02-4f48-848d-aa073b8391ae)
 ## Front-end
 ## Back-end
 ## Database
