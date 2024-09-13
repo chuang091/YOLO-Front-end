@@ -1,10 +1,10 @@
-// src/MainApp.js
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, NavLink } from 'react-router-dom';
-import ForegroundApp from './ForegroundApp'; // 確保路徑正確
-import BackgroundApp from './BackgroundApp'; // 確保路徑正確
+import ForegroundApp from './ForegroundApp';
+import BackgroundApp from './BackgroundApp';
 import Annotation from './Annotation';
 import Dashboard from './Dashboard';
+import UploadImage from './UploadImage'; // 新增的組件
 import './App.css';
 
 function MainApp() {
@@ -24,8 +24,13 @@ function MainApp() {
               </NavLink>
             </li>
             <li>
-              <NavLink to="/Dashboard" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              <NavLink to="/dashboard" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
                 Dashboard
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/upload" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                上傳圖片
               </NavLink>
             </li>
           </ul>
@@ -35,6 +40,7 @@ function MainApp() {
           <Route path="/background" element={<BackgroundApp />} />
           <Route path="/annotation" element={<Annotation />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/upload" element={<UploadImage />} />
         </Routes>
       </div>
     </Router>
