@@ -7,7 +7,7 @@ function ForegroundApp() {
   const [images, setImages] = useState([]);
   const [annotations, setAnnotations] = useState([]);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
-  const [imagesToShow, setImagesToShow] = useState(10);
+  const [imagesToShow, setImagesToShow] = useState(100);
   const [selectedImages, setSelectedImages] = useState(new Set());
   const navigate = useNavigate();
 
@@ -55,7 +55,7 @@ function ForegroundApp() {
   }, [imagesToShow, images]);
 
   const loadMoreImages = () => {
-    setImagesToShow(prev => Math.min(prev + 10, images.length));
+    setImagesToShow(prev => Math.min(prev + 100, images.length));
   };
 
   const handleNavigateToAnnotation = () => {
