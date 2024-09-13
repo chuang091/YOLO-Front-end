@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import './MarkImages.css'; // 引入 CSS 檔案
+import { useNavigate } from 'react-router-dom';  
 
 function MarkImages() {
   const [modalOpen, setModalOpen] = useState(false); // 控制彈出視窗
   const [selectedCount, setSelectedCount] = useState(10); // 默認選擇的數量
   const [customCount, setCustomCount] = useState(''); // 自訂數量
+  const navigate = useNavigate();  // 用於導航
 
   // 打開彈窗
   const openModal = () => {
@@ -29,14 +31,21 @@ function MarkImages() {
     setCustomCount(event.target.value);
   };
 
-  // 開始標記：從後端獲取圖片
+  // 開始標記：從後端獲取圖片並導航到 Annotation
   const handleStartMarking = () => {
-    const count = parseInt(selectedCount, 10);
-    
+    const count = parseInt(selectedCount, 10) || parseInt(customCount, 10);
+
     // 從後端請求 Pending 圖片數據
     axios.get(`http://localhost:5500/pending?count=${count}`)
       .then(response => {
-        console.log('Fetched pending images:', response.data); // 暫時先 log 出來
+        const fetchedImages = response.data.map((image, index) => ({
+          data: image.image,  // Base64 數據
+          filename: `image_${index + 1}`,  // 假設圖片名稱
+          _id: image._id  // 從數據中獲取 _id
+        }));
+        console.log('Fetched pending images:', fetchedImages);
+        // 導航到 Annotation 並傳遞撈取的圖片
+        navigate('/annotation', { state: { images: fetchedImages, selectedImages: fetchedImages.map(img => img._id) } });
       })
       .catch(error => {
         console.error('Error fetching pending images:', error);

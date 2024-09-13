@@ -50,7 +50,7 @@ const objectDetection = async (imageData, imageName, imageID) => {
 function Annotation() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { selectedImages, images, annotations } = location.state || { selectedImages: [], images: [], annotations: [] };
+  const { selectedImages, images, annotations = [] } = location.state || { selectedImages: [], images: [], annotations: [] }; 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaneOpen, setIsPaneOpen] = useState(false);
   const [hoveredAnnotation, setHoveredAnnotation] = useState(null);
