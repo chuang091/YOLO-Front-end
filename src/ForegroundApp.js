@@ -1,4 +1,3 @@
-// src/ForegroundApp.js
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -8,6 +7,7 @@ function ForegroundApp() {
   const [images, setImages] = useState([]);
   const [annotations, setAnnotations] = useState([]);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const [imagesToShow, setImagesToShow] = useState(10);
   const [selectedImages, setSelectedImages] = useState(new Set());
   const navigate = useNavigate();
 
@@ -34,6 +34,29 @@ function ForegroundApp() {
       setIsDataLoaded(true);
     }, 2000);
   }, []);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        loadMoreImages();
+      }
+    });
+
+    const trigger = document.querySelector('.load-more-trigger');
+    if (trigger) {
+      observer.observe(trigger);
+    }
+
+    return () => {
+      if (trigger) {
+        observer.disconnect();
+      }
+    };
+  }, [imagesToShow, images]);
+
+  const loadMoreImages = () => {
+    setImagesToShow(prev => Math.min(prev + 10, images.length));
+  };
 
   const handleNavigateToAnnotation = () => {
     navigate('/annotation', { state: { selectedImages: Array.from(selectedImages), images, annotations } });
@@ -154,29 +177,33 @@ function ForegroundApp() {
       </div>
       {isDataLoaded ? (
         <div className="image-gallery">
-          {images.filter(image => annotations.some(annotation => annotation.image_id === image._id)).map((image, index) => (
-            <div
-              key={image._id || index}
-              className={`image-container ${selectedImages.has(image._id) ? 'selected' : ''}`}
-              onClick={(e) => handleImageClick(e, image._id)}
-              onDoubleClick={() => handleDoubleClick(image._id)}
-            >
-              {image.data ? (
-                <>
-                  <div className="image-name">{image.filename}</div>
-                  <img 
-                    src={`data:image/jpeg;base64,${image.data}`} 
-                    alt={image.filename} 
-                    className="hidden-image"
-                    onLoad={(e) => handleImageLoad(e, image._id)}
-                  />
-                  <canvas className="image-canvas"></canvas>
-                </>
-              ) : (
-                <p>圖片數據缺失</p>
-              )}
-            </div>
-          ))}
+          {images
+            .filter(image => annotations.some(annotation => annotation.image_id === image._id)) // 確保圖片有標記
+            .slice(0, imagesToShow)  // 控制顯示數量
+            .map((image, index) => (
+              <div
+                key={image._id || index}
+                className={`image-container ${selectedImages.has(image._id) ? 'selected' : ''}`}
+                onClick={(e) => handleImageClick(e, image._id)}
+                onDoubleClick={() => handleDoubleClick(image._id)}
+              >
+                {image.data ? (
+                  <>
+                    <div className="image-name">{image.filename}</div>
+                    <img
+                      src={`data:image/jpeg;base64,${image.data}`}
+                      alt={image.filename}
+                      className="hidden-image"
+                      onLoad={(e) => handleImageLoad(e, image._id)}
+                    />
+                    <canvas className="image-canvas"></canvas>
+                  </>
+                ) : (
+                  <p>圖片數據缺失</p>
+                )}
+              </div>
+            ))}
+          <div className="load-more-trigger"></div>
         </div>
       ) : (
         <p>加載中...</p>
