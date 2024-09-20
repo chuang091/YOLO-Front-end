@@ -35,15 +35,16 @@ function MarkImages() {
   const handleStartMarking = () => {
     const count = parseInt(selectedCount, 10) || parseInt(customCount, 10);
 
-    // 從後端請求 Pending 圖片數據
-    axios.get(`http://localhost:5500/pending?count=${count}`)
+    // 調用新的 API: /api/start-marking
+    axios.post('http://localhost:5500/start-marking', { count })
       .then(response => {
         const fetchedImages = response.data.map((image, index) => ({
-          data: image.image,  // Base64 數據
-          filename: `image_${index + 1}`,  // 假設圖片名稱
+          data: image.data,  // Base64 數據，假設後端現在返回 'data' 欄位
+          filename: `image_${index + 1}`,  // 假設圖片名稱，或使用 image.filename
           _id: image._id  // 從數據中獲取 _id
         }));
         console.log('Fetched pending images:', fetchedImages);
+
         // 導航到 Annotation 並傳遞撈取的圖片
         navigate('/annotation', { state: { images: fetchedImages, selectedImages: fetchedImages.map(img => img._id) } });
       })
