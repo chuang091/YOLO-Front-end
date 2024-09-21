@@ -1,0 +1,8 @@
+.segmentation-mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-size: cover;
+    z-index: 100; /* 確保在畫布之上 */
+  }
+  

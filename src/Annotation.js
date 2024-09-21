@@ -7,6 +7,7 @@ import './Annotation.css';
 import PolygonDrawer from './PolygonDrawer';
 import Sam from './Sam';
 import ObjectDetection from './ObjectDetection';
+import InstanceSegmentation from './InstanceSegmentation'; // Import InstanceSegmentation
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
@@ -35,16 +36,29 @@ const setImage = (imageData, imageName) => {
   });
 };
 
-const globalDetectionResults = {}; // 全局字典
+const globalDetectionResults = {}; // Global dictionary for detection results
+const globalSegmentationResults = {}; // Global dictionary for segmentation results
 
+// Object detection function
 const objectDetection = async (imageData, imageName, imageID) => {
   const requestData = {
     image_name: imageName,
     image_data: `data:image/jpeg;base64,${imageData}`
   };
   const response = await axios.post('http://localhost:5500/process_image_od', requestData);
-  globalDetectionResults[imageID] = response.data; // 存儲偵測結果到全局字典
+  globalDetectionResults[imageID] = response.data;
   console.log(`Object detection result for image ID: ${imageName}`, response.data);
+};
+
+// Instance segmentation function
+const instanceSegmentation = async (imageData, imageName, imageID) => {
+  const requestData = {
+    image_name: imageName,
+    image_data: `data:image/jpeg;base64,${imageData}`
+  };
+  const response = await axios.post('http://localhost:5500/process_image', requestData);
+  globalSegmentationResults[imageID] = response.data;
+  console.log(`Instance segmentation result for image ID: ${imageName}`, response.data);
 };
 
 function Annotation() {
@@ -55,11 +69,12 @@ function Annotation() {
   const [isPaneOpen, setIsPaneOpen] = useState(false);
   const [hoveredAnnotation, setHoveredAnnotation] = useState(null);
   const [polygonClass, setPolygonClass] = useState(1);
-  const [isDrawing, setIsDrawing] = useState(false); // 控制繪製多邊形模式
-  const [isSamModel, setIsSamModel] = useState(false); // 控制 SAM 模式
-  const [isObjectDetectionEnabled, setIsObjectDetectionEnabled] = useState(false); // 控制物體檢測
-  const [progress, setProgress] = useState(0); // 進度條進度
-  const [progressStatus, setProgressStatus] = useState("處理中..."); // 進度條狀態
+  const [isDrawing, setIsDrawing] = useState(false); 
+  const [isSamModel, setIsSamModel] = useState(false); 
+  const [isObjectDetectionEnabled, setIsObjectDetectionEnabled] = useState(false); 
+  const [isSegmentationEnabled, setIsSegmentationEnabled] = useState(false); // Control instance segmentation
+  const [progress, setProgress] = useState(0); 
+  const [progressStatus, setProgressStatus] = useState("處理中..."); 
 
   const handlePrevious = () => {
     setCurrentIndex((prevIndex) => (prevIndex === 0 ? selectedImages.length - 1 : prevIndex - 1));
@@ -99,7 +114,6 @@ function Annotation() {
       }
     });
   };
-  
 
   const currentImageId = selectedImages[currentIndex];
   const currentImage = images.find(image => image._id === currentImageId);
@@ -129,16 +143,22 @@ function Annotation() {
     document.querySelectorAll('.ptype').forEach(li => li.classList.remove('active'));
     e.target.parentElement.classList.add('active');
   };
+
   const handleToggleObjectDetection = () => {
     setIsObjectDetectionEnabled(!isObjectDetectionEnabled);
     if (!isObjectDetectionEnabled) {
       const detectionCanvas = document.getElementById('detectionCanvas');
       if (detectionCanvas) {
         const detectionCtx = detectionCanvas.getContext('2d');
-        detectionCtx.clearRect(0, 0, detectionCanvas.width, detectionCanvas.height); // 清除畫布
+        detectionCtx.clearRect(0, 0, detectionCanvas.width, detectionCanvas.height); 
       }
     }
   };
+
+  const handleToggleSegmentation = () => {
+    setIsSegmentationEnabled(!isSegmentationEnabled);
+  };
+
 
   const handleDeleteAnnotation = (id) => {
     axios.delete(`http://localhost:5500/api/annotations/${id}`)
@@ -156,14 +176,14 @@ function Annotation() {
   const handleToggleDrawing = () => {
     setIsDrawing(!isDrawing);
     if (!isDrawing) {
-      setIsSamModel(false); // 禁用 SAM 模式
+      setIsSamModel(false);
     }
   };
 
   const handleToggleSamModel = () => {
     setIsSamModel(!isSamModel);
     if (!isSamModel) {
-      setIsDrawing(false); // 禁用繪製多邊形模式
+      setIsDrawing(false); 
     }
   };
 
@@ -174,11 +194,10 @@ function Annotation() {
         console.log(`處理圖片: ${image.filename}`);
         await setImage(image.data, image.filename);
         console.log(`已設定圖片: ${image.filename}`);
-        await objectDetection(image.data, image.filename,image._id);
-        console.log(`已檢測物體: ${image.filename}`);
+        await objectDetection(image.data, image.filename, image._id);
+        await instanceSegmentation(image.data, image.filename, image._id);
+        console.log(`已檢測實例分割: ${image.filename}`);
         setProgress(((i + 1) / selectedImages.length) * 100);
-
-        
       }
     }
     setProgressStatus("已完成");
@@ -204,22 +223,29 @@ function Annotation() {
         </ul>
         <button onClick={handleToggleDrawing}>{isDrawing ? '停止繪製多邊形' : '繪製多邊形'}</button>
         <button onClick={handleToggleSamModel}>{isSamModel ? '停止 SAM 模式' : '啟動 SAM 模式'}</button>
-          <div className="ios-switch">
-            <label>
-              物體檢測   
-              <input type="checkbox" checked={isObjectDetectionEnabled} onChange={handleToggleObjectDetection} />
-              <span className="slider round"></span>
-            </label>
-          </div>
+        <div className="ios-switch">
+          <label>
+          實例分割   
+            <input type="checkbox" checked={isSegmentationEnabled} onChange={handleToggleSegmentation} />
+            <span className="slider round"></span>
+          </label>
+        </div>
+        <div className="ios-switch">
+          <label>
+            物體檢測   
+            <input type="checkbox" checked={isObjectDetectionEnabled} onChange={handleToggleObjectDetection} />
+            <span className="slider round"></span>
+          </label>
+        </div>
       </div>
       <button onClick={handleBack} className="back-button">回到上一頁</button>
       <button onClick={() => setIsPaneOpen(true)} className="annotations-button">查看標記</button>
       {currentImage ? (
         <div className="image-display">
           <button onClick={handlePrevious}>上一張</button>
-          
           <div className="canvas-container">
-          <div id="detectionContainer" className="image-display"></div>
+            <div id="detectionContainer" className="image-display"></div>
+            <div id="segmentationContainer" className="segmentation-container"></div>
             <canvas id="annotationCanvas"></canvas>
             <img id="baseImage" src={`data:image/jpeg;base64,${currentImage.data}`} alt={currentImage.filename} className="annotation-image" style={{ display: 'none' }} />
           </div>
@@ -260,18 +286,23 @@ function Annotation() {
         </ul>
       </SlidingPane>
       <PolygonDrawer canvasId="annotationCanvas" imageId={currentImageId} existingAnnotations={currentAnnotations} polygonClass={polygonClass} isDrawing={isDrawing} />
-      <Sam canvasId="annotationCanvas" imageId={currentImageId} existingAnnotations={currentAnnotations} isSamModel={isSamModel} polygonClass={polygonClass} />
-      
-
-    <ObjectDetection
+      <Sam canvasId="annotationCanvas" imageId={currentImageId} existingAnnotations={currentAnnotations} isSamModel={isSamModel} />
+      <ObjectDetection
         containerId="detectionContainer"
         imageId={currentImageId}
         imageName={currentImage.filename}
         imageData={currentImage.data}
         isObjectDetectionEnabled={isObjectDetectionEnabled}
         detectionResults={globalDetectionResults}
-    />
-
+      />
+      <InstanceSegmentation
+        containerId="segmentationContainer"
+        imageId={currentImageId}
+        imageName={currentImage.filename}
+        imageData={currentImage.data}
+        isSegmentationEnabled={isSegmentationEnabled}
+        segmentationResults={globalSegmentationResults}
+      />
     </div>
   );
 }
