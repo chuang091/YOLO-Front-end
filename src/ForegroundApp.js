@@ -55,7 +55,7 @@ function ForegroundApp() {
   }, [imagesToShow, images]);
 
   const loadMoreImages = () => {
-    setImagesToShow(prev => Math.min(prev + 100, images.length));
+    setImagesToShow(prev => Math.min(prev + 1000, images.length));
   };
 
   const handleNavigateToAnnotation = () => {
