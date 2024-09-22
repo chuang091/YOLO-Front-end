@@ -41,6 +41,7 @@ function InstanceSegmentation({ containerId, imageId, isSegmentationEnabled, seg
     if (isSegmentationEnabled) {
       const segmentationData = segmentationResults[imageId];
       if (!segmentationData || !Array.isArray(segmentationData)) return;
+      console.log('segmentationData:', segmentationData);
 
       segmentationData.forEach((segment) => {
         if (segment.segments) {

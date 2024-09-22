@@ -301,7 +301,7 @@ function Annotation() {
         </ul>
       </SlidingPane>
       <PolygonDrawer canvasId="annotationCanvas" imageId={currentImageId} existingAnnotations={currentAnnotations} polygonClass={polygonClass} isDrawing={isDrawing} />
-      <Sam canvasId="annotationCanvas" imageId={currentImageId} existingAnnotations={currentAnnotations} isSamModel={isSamModel} />
+      <Sam canvasId="annotationCanvas" imageId={currentImageId} existingAnnotations={currentAnnotations} isSamModel={isSamModel} polygonClass={polygonClass} />
       <ObjectDetection
         containerId="detectionContainer"
         imageId={currentImageId}
