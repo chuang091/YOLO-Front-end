@@ -42,7 +42,7 @@ const setImage = async (imageData, imageName) => {
 const fetchObjectDetection = async (imageData, imageName, imageID, setDetectionResults) => {
   try {
     const requestData = {
-      image_name: imageName,
+      image_name: imageID,
       image_data: `data:image/jpeg;base64,${imageData}`
     };
     const response = await axios.post('http://localhost:5500/process_image_od', requestData);
