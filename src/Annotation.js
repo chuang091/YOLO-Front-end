@@ -1,4 +1,3 @@
-// src/Annotation.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import SlidingPane from 'react-sliding-pane';
@@ -7,7 +6,7 @@ import './Annotation.css';
 import PolygonDrawer from './PolygonDrawer';
 import Sam from './Sam';
 import ObjectDetection from './ObjectDetection';
-import InstanceSegmentation from './InstanceSegmentation'; // Import InstanceSegmentation
+import InstanceSegmentation from './InstanceSegmentation';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
@@ -26,55 +25,72 @@ const classColors = {
   "10": "rgba(0, 128, 128, 0.5)"
 };
 
-const setImage = (imageData, imageName) => {
-  return fetch('http://localhost:5500/set_image2', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ image_data: imageData, image_name: imageName }),
-  });
+// Function to process and set an image on the server
+const setImage = async (imageData, imageName) => {
+  try {
+    await axios.post('http://localhost:5500/set_image2', {
+      image_data: imageData,
+      image_name: imageName
+    });
+    console.log(`Image ${imageName} set successfully.`);
+  } catch (error) {
+    console.error('Error setting image:', error);
+  }
 };
 
-const globalDetectionResults = {}; // Global dictionary for detection results
-const globalSegmentationResults = {}; // Global dictionary for segmentation results
-
-// Object detection function
-const objectDetection = async (imageData, imageName, imageID) => {
-  const requestData = {
-    image_name: imageName,
-    image_data: `data:image/jpeg;base64,${imageData}`
-  };
-  const response = await axios.post('http://localhost:5500/process_image_od', requestData);
-  globalDetectionResults[imageID] = response.data;
-  console.log(`Object detection result for image ID: ${imageName}`, response.data);
+// Function to fetch object detection results
+const fetchObjectDetection = async (imageData, imageName, imageID, setDetectionResults) => {
+  try {
+    const requestData = {
+      image_name: imageName,
+      image_data: `data:image/jpeg;base64,${imageData}`
+    };
+    const response = await axios.post('http://localhost:5500/process_image_od', requestData);
+    setDetectionResults(prev => ({
+      ...prev,
+      [imageID]: response.data
+    }));
+    console.log(`Object detection result for image ID: ${imageName}`, response.data);
+  } catch (error) {
+    console.error('Error fetching object detection:', error);
+  }
 };
 
-// Instance segmentation function
-const instanceSegmentation = async (imageData, imageName, imageID) => {
-  const requestData = {
-    image_name: imageName,
-    image_data: `data:image/jpeg;base64,${imageData}`
-  };
-  const response = await axios.post('http://localhost:5500/process_image', requestData);
-  globalSegmentationResults[imageID] = response.data;
-  console.log(`Instance segmentation result for image ID: ${imageName}`, response.data);
+// Function to fetch instance segmentation results
+const fetchInstanceSegmentation = async (imageData, imageName, imageID, setSegmentationResults) => {
+  try {
+    const requestData = {
+      image_name: imageID,
+      image_data: `data:image/jpeg;base64,${imageData}`
+    };
+    const response = await axios.post('http://localhost:5500/process_image', requestData);
+    setSegmentationResults(prev => ({
+      ...prev,
+      [imageID]: response.data
+    }));
+    console.log(`Instance segmentation result for image ID: ${imageName}`, response.data);
+  } catch (error) {
+    console.error('Error fetching instance segmentation:', error);
+  }
 };
 
 function Annotation() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { selectedImages, images, annotations = [] } = location.state || { selectedImages: [], images: [], annotations: [] }; 
+  const { selectedImages, images, annotations = [] } = location.state || { selectedImages: [], images: [], annotations: [] };
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPaneOpen, setIsPaneOpen] = useState(false);
+  const [detectionResults, setDetectionResults] = useState({});
+  const [segmentationResults, setSegmentationResults] = useState({});
   const [hoveredAnnotation, setHoveredAnnotation] = useState(null);
   const [polygonClass, setPolygonClass] = useState(1);
-  const [isDrawing, setIsDrawing] = useState(false); 
-  const [isSamModel, setIsSamModel] = useState(false); 
-  const [isObjectDetectionEnabled, setIsObjectDetectionEnabled] = useState(false); 
-  const [isSegmentationEnabled, setIsSegmentationEnabled] = useState(false); // Control instance segmentation
-  const [progress, setProgress] = useState(0); 
-  const [progressStatus, setProgressStatus] = useState("處理中..."); 
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [isSamModel, setIsSamModel] = useState(false);
+  const [isObjectDetectionEnabled, setIsObjectDetectionEnabled] = useState(false);
+  const [isSegmentationEnabled, setIsSegmentationEnabled] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [progressStatus, setProgressStatus] = useState("處理中...");
+  const [isPaneOpen, setIsPaneOpen] = useState(false);
+
 
   const handlePrevious = () => {
     setCurrentIndex((prevIndex) => (prevIndex === 0 ? selectedImages.length - 1 : prevIndex - 1));
@@ -150,7 +166,7 @@ function Annotation() {
       const detectionCanvas = document.getElementById('detectionCanvas');
       if (detectionCanvas) {
         const detectionCtx = detectionCanvas.getContext('2d');
-        detectionCtx.clearRect(0, 0, detectionCanvas.width, detectionCanvas.height); 
+        detectionCtx.clearRect(0, 0, detectionCanvas.width, detectionCanvas.height);
       }
     }
   };
@@ -159,13 +175,12 @@ function Annotation() {
     setIsSegmentationEnabled(!isSegmentationEnabled);
   };
 
-
   const handleDeleteAnnotation = (id) => {
     axios.delete(`http://localhost:5500/api/annotations/${id}`)
       .then(response => {
         console.log('Annotation deleted:', response.data);
         const updatedAnnotations = annotations.filter(annotation => annotation._id !== id);
-        setHoveredAnnotation(null); 
+        setHoveredAnnotation(null);
         drawAnnotations(document.getElementById('annotationCanvas'), currentImageId);
       })
       .catch(error => {
@@ -183,19 +198,19 @@ function Annotation() {
   const handleToggleSamModel = () => {
     setIsSamModel(!isSamModel);
     if (!isSamModel) {
-      setIsDrawing(false); 
+      setIsDrawing(false);
     }
   };
 
+  // Process all selected images
   const processAllImages = async () => {
     for (let i = 0; i < selectedImages.length; i++) {
       const image = images.find(img => img._id === selectedImages[i]);
       if (image) {
         console.log(`處理圖片: ${image.filename}`);
         await setImage(image.data, image.filename);
-        console.log(`已設定圖片: ${image.filename}`);
-        await objectDetection(image.data, image.filename, image._id);
-        await instanceSegmentation(image.data, image.filename, image._id);
+        await fetchObjectDetection(image.data, image.filename, image._id, setDetectionResults);
+        await fetchInstanceSegmentation(image.data, image.filename, image._id, setSegmentationResults);
         console.log(`已檢測實例分割: ${image.filename}`);
         setProgress(((i + 1) / selectedImages.length) * 100);
       }
@@ -293,7 +308,7 @@ function Annotation() {
         imageName={currentImage.filename}
         imageData={currentImage.data}
         isObjectDetectionEnabled={isObjectDetectionEnabled}
-        detectionResults={globalDetectionResults}
+        detectionResults={detectionResults}
       />
       <InstanceSegmentation
         containerId="segmentationContainer"
@@ -301,7 +316,7 @@ function Annotation() {
         imageName={currentImage.filename}
         imageData={currentImage.data}
         isSegmentationEnabled={isSegmentationEnabled}
-        segmentationResults={globalSegmentationResults}
+        segmentationResults={segmentationResults}
       />
     </div>
   );
