@@ -235,6 +235,7 @@ function Annotation() {
           <li className="ptype" data-ptype="7"><button className="ptypeBtn" data-ptype="7" onClick={handleClassChange}>樹林</button></li>
           <li className="ptype" data-ptype="8"><button className="ptypeBtn" data-ptype="8" onClick={handleClassChange}>竹林</button></li>
           <li className="ptype" data-ptype="9"><button className="ptypeBtn" data-ptype="9" onClick={handleClassChange}>旱地</button></li>
+          <li className="ptype" data-ptype="10"><button className="ptypeBtn" data-ptype="10" onClick={handleClassChange}>樹竹</button></li>
         </ul>
         <button onClick={handleToggleDrawing}>{isDrawing ? '停止繪製多邊形' : '繪製多邊形'}</button>
         <button onClick={handleToggleSamModel}>{isSamModel ? '停止 SAM 模式' : '啟動 SAM 模式'}</button>
