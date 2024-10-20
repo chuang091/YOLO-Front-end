@@ -17,7 +17,7 @@ const Sam = ({ canvasId, imageId, existingAnnotations, isSamModel, polygonClass 
     "6": "rgba(128, 0, 0, 0.5)",
     "7": "rgba(0, 128, 0, 0.5)",
     "8": "rgba(0, 0, 128, 0.5)",
-    "9": "rgba(128, 128, 0.5)",
+    "9": "rgba(128, 128,0, 0.5)",
     "10": "rgba(0, 128, 128, 0.5)"
   };
 
