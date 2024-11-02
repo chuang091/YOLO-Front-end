@@ -13,6 +13,8 @@ function ForegroundApp() {
   const [imagesToShow, setImagesToShow] = useState(100);
   const [selectedImages, setSelectedImages] = useState(new Set());
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [lastSelectedIndex, setLastSelectedIndex] = useState(null);
+  
   const navigate = useNavigate();
    // 開啟和關閉模態框的函數
    const openModal = () => {
@@ -27,6 +29,10 @@ function ForegroundApp() {
       .then(response => {
         console.log('Fetched images:', response.data);
         setImages(response.data);
+        const imagesWithIndex = images.map((item, index) => ({
+          ...item,
+          index,
+        }));
       })
       .catch(error => {
         console.error('There was an error fetching the images!', error);
@@ -129,8 +135,9 @@ function ForegroundApp() {
     drawAnnotations(canvas, imageId);
   };
 
-  const handleImageClick = (event, imageId) => {
-    if (event.shiftKey) {
+  const handleImageClick = (event , imageId, index) => {
+    // 如果按下 Ctrl 鍵，則添加或刪除單個項目
+    if (event.ctrlKey || event.metaKey) {
       setSelectedImages(prevSelectedImages => {
         const newSelectedImages = new Set(prevSelectedImages);
         if (newSelectedImages.has(imageId)) {
@@ -138,10 +145,27 @@ function ForegroundApp() {
         } else {
           newSelectedImages.add(imageId);
         }
+        setLastSelectedIndex(index);
         return newSelectedImages;
       });
-    } else {
+    }
+    // 如果按下 Shift 鍵，則執行範圍選擇
+    else if (event.shiftKey && lastSelectedIndex !== null) {
+      const start = Math.min(lastSelectedIndex, index);
+      const end = Math.max(lastSelectedIndex, index);
+
+      setSelectedImages(prevSelectedImages => {
+        const newSelectedImages = new Set(prevSelectedImages);
+        for (let i = start; i <= end; i++) {
+          newSelectedImages.add(images[i]);
+        }
+        return newSelectedImages;
+      });
+    }
+    // 如果沒有按下任何特殊鍵，僅選擇當前項目
+    else {
       setSelectedImages(new Set([imageId]));
+      setLastSelectedIndex(index);
     }
   };
 
