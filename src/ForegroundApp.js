@@ -3,13 +3,24 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './App.css';
 
+import { handleTagSelectedImages } from './tag.ts'; // 引入新功能組件
+import CategorySelectorModal from './modal.tsx';
+
 function ForegroundApp() {
   const [images, setImages] = useState([]);
   const [annotations, setAnnotations] = useState([]);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [imagesToShow, setImagesToShow] = useState(100);
   const [selectedImages, setSelectedImages] = useState(new Set());
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
+   // 開啟和關閉模態框的函數
+   const openModal = () => {
+    console.log("開啟模態框");
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => setIsModalOpen(false);
 
   useEffect(() => {
     axios.get('http://localhost:5500/api/images')
@@ -159,6 +170,10 @@ function ForegroundApp() {
     });
   };
 
+  const handelTagClick = () => {
+    handleTagSelectedImages(selectedImages,openModal);
+  };
+
   const annotatedImageCount = images.filter(image => annotations.some(annotation => annotation.image_id === image._id)).length;
 
   return (
@@ -167,6 +182,14 @@ function ForegroundApp() {
         <h1>圖片和標記數據檢視平台</h1>
         <button onClick={handleDownloadAllImages}>下載所有圖片</button>
         <button onClick={handleDeleteSelectedImages}>刪除選中的圖片</button>
+        <button onClick={handelTagClick}>標記為已選擇</button>
+        {isModalOpen && (
+        <CategorySelectorModal 
+          isOpen={isModalOpen} 
+          onClose={closeModal} 
+          onStart={(category) => console.log("選擇的類別:", category)}
+        />
+      )}
         <button onClick={handleNavigateToAnnotation} disabled={selectedImages.size === 0}>
           前往標記頁面
         </button>
