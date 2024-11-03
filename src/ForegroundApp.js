@@ -3,36 +3,58 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './App.css';
 
+import { handleTagSelectedImages } from './tag.ts'; // 引入新功能組件
+import CategorySelectorModal from './modal.tsx';
+import classColors from './classcolors.ts';
+
 function ForegroundApp() {
   const [images, setImages] = useState([]);
   const [annotations, setAnnotations] = useState([]);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [imagesToShow, setImagesToShow] = useState(100);
   const [selectedImages, setSelectedImages] = useState(new Set());
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [lastSelectedIndex, setLastSelectedIndex] = useState(null);
+
   const navigate = useNavigate();
+  // 開啟和關閉模態框的函數
+  const openModal = () => {
+    console.log("開啟模態框");
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => setIsModalOpen(false);
 
   useEffect(() => {
-    axios.get('http://localhost:5500/api/images')
-      .then(response => {
-        console.log('Fetched images:', response.data);
-        setImages(response.data);
-      })
-      .catch(error => {
-        console.error('There was an error fetching the images!', error);
-      });
-
     axios.get('http://localhost:5500/api/annotations')
       .then(response => {
         console.log('Fetched annotations:', response.data);
-        setAnnotations(response.data);
+        const fetchedAnnotations = response.data;
+        setAnnotations(fetchedAnnotations);
+
+        axios.get('http://localhost:5500/api/images')
+          .then(response => {
+            console.log(response.data, fetchedAnnotations);
+            const filteredImage = response.data.filter(image => fetchedAnnotations.some(annotation => annotation.image_id === image._id));
+            console.log('filteredImage', filteredImage);
+            const imagesWithIndex = filteredImage.map((item, index) => ({
+              ...item,
+              index,
+            }));
+            console.log('Fetched images:', imagesWithIndex);
+            setImages(imagesWithIndex);
+
+            setTimeout(() => {
+              setIsDataLoaded(true);
+            }, 2000);
+          })
+          .catch(error => {
+            console.error('There was an error fetching the images!', error);
+          });
       })
       .catch(error => {
         console.error('There was an error fetching the annotations!', error);
       });
-
-    setTimeout(() => {
-      setIsDataLoaded(true);
-    }, 2000);
   }, []);
 
   useEffect(() => {
@@ -60,20 +82,6 @@ function ForegroundApp() {
 
   const handleNavigateToAnnotation = () => {
     navigate('/annotation', { state: { selectedImages: Array.from(selectedImages), images, annotations } });
-  };
-
-  const classColors = {
-    "0": "rgba(255, 0, 0, 0.5)",
-    "1": "rgba(0, 255, 0, 0.5)",
-    "2": "rgba(0, 0, 255, 0.5)",
-    "3": "rgba(255, 255, 0, 0.5)",
-    "4": "rgba(0, 255, 255, 0.5)",
-    "5": "rgba(255, 0, 255, 0.5)",
-    "6": "rgba(128, 0, 0, 0.5)",
-    "7": "rgba(0, 128, 0, 0.5)",
-    "8": "rgba(0, 0, 128, 0.5)",
-    "9": "rgba(128, 128, 0 , 0.5)",
-    "10": "rgba(0, 128, 128, 0.5)"
   };
 
   const drawAnnotations = (canvas, imageId) => {
@@ -118,8 +126,10 @@ function ForegroundApp() {
     drawAnnotations(canvas, imageId);
   };
 
-  const handleImageClick = (event, imageId) => {
-    if (event.shiftKey) {
+  const handleImageClick = (event, imageId, index) => {
+    // 如果按下 Ctrl 鍵，則添加或刪除單個項目
+    console.log(index);
+    if (event.ctrlKey || event.metaKey) {
       setSelectedImages(prevSelectedImages => {
         const newSelectedImages = new Set(prevSelectedImages);
         if (newSelectedImages.has(imageId)) {
@@ -127,10 +137,28 @@ function ForegroundApp() {
         } else {
           newSelectedImages.add(imageId);
         }
+        setLastSelectedIndex(index);
         return newSelectedImages;
       });
-    } else {
+    }
+    // 如果按下 Shift 鍵，則執行範圍選擇
+    else if (event.shiftKey && lastSelectedIndex !== null) {
+      const start = Math.min(lastSelectedIndex, index);
+      const end = Math.max(lastSelectedIndex, index);
+
+      setSelectedImages(prevSelectedImages => {
+        const newSelectedImages = new Set(prevSelectedImages);
+        for (let i = start; i <= end; i++) {
+          newSelectedImages.add(images[i]._id);
+        }
+        console.log(newSelectedImages);
+        return newSelectedImages;
+      });
+    }
+    // 如果沒有按下任何特殊鍵，僅選擇當前項目
+    else {
       setSelectedImages(new Set([imageId]));
+      setLastSelectedIndex(index);
     }
   };
 
@@ -159,6 +187,10 @@ function ForegroundApp() {
     });
   };
 
+  const handelTagClick = () => {
+    handleTagSelectedImages(selectedImages, openModal);
+  };
+
   const annotatedImageCount = images.filter(image => annotations.some(annotation => annotation.image_id === image._id)).length;
 
   return (
@@ -167,6 +199,14 @@ function ForegroundApp() {
         <h1>圖片和標記數據檢視平台</h1>
         <button onClick={handleDownloadAllImages}>下載所有圖片</button>
         <button onClick={handleDeleteSelectedImages}>刪除選中的圖片</button>
+        <button onClick={handelTagClick}>標記為已選擇</button>
+        {isModalOpen && (
+          <CategorySelectorModal
+            isOpen={isModalOpen}
+            onClose={closeModal}
+            onStart={(category) => console.log("選擇的類別:", category)}
+          />
+        )}
         <button onClick={handleNavigateToAnnotation} disabled={selectedImages.size === 0}>
           前往標記頁面
         </button>
@@ -184,7 +224,7 @@ function ForegroundApp() {
               <div
                 key={image._id || index}
                 className={`image-container ${selectedImages.has(image._id) ? 'selected' : ''}`}
-                onClick={(e) => handleImageClick(e, image._id)}
+                onClick={(e) => handleImageClick(e, image._id, image.index)}
                 onDoubleClick={() => handleDoubleClick(image._id)}
               >
                 {image.data ? (

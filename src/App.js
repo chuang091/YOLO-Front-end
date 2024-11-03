@@ -6,6 +6,7 @@ import Annotation from './Annotation';
 import Dashboard from './Dashboard';
 import UploadImage from './UploadImage';
 import MarkImages from './MarkImages'; // 引入新功能組件
+import Map from './Map'; // 引入新功能組件
 import './App.css';
 
 function MainApp() {
@@ -39,6 +40,11 @@ function MainApp() {
                 開始標記
               </NavLink>
             </li>
+            <li>
+              <NavLink to="/map" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                地圖標記
+              </NavLink>
+            </li>
           </ul>
         </nav>
         <Routes>
@@ -47,7 +53,8 @@ function MainApp() {
           <Route path="/annotation" element={<Annotation />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/upload" element={<UploadImage />} />
-          <Route path="/mark" element={<MarkImages />} /> {/* 新功能路由 */}
+          <Route path="/mark" element={<MarkImages />} /> 
+          <Route path="/map" element={<Map />} /> 
         </Routes>
       </div>
     </Router>
