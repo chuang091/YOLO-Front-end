@@ -1,22 +1,9 @@
 import React, { useEffect } from 'react';
 import axios from 'axios';
 import './InstanceSegmentation.css';
+import classColors from './classcolors.ts';
 
 function InstanceSegmentation({ containerId, imageId, isSegmentationEnabled, segmentationResults }) {
-  // Color mapping for each class
-  const classColors = {
-    "0": "rgba(255, 0, 0, 0.5)",
-    "1": "rgba(0, 255, 0, 0.5)",
-    "2": "rgba(0, 0, 255, 0.5)",
-    "3": "rgba(255, 255, 0, 0.5)",
-    "4": "rgba(0, 255, 255, 0.5)",
-    "5": "rgba(255, 0, 255, 0.5)",
-    "6": "rgba(128, 0, 0, 0.5)",
-    "7": "rgba(0, 128, 0, 0.5)",
-    "8": "rgba(0, 0, 128, 0.5)",
-    "9": "rgba(128, 128, 0.5)",
-    "10": "rgba(0, 128, 128, 0.5)"
-  };
 
   // Reverse class map for saving annotations
   const classMap = {

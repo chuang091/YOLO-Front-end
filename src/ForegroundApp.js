@@ -5,6 +5,7 @@ import './App.css';
 
 import { handleTagSelectedImages } from './tag.ts'; // 引入新功能組件
 import CategorySelectorModal from './modal.tsx';
+import classColors from './classcolors.ts';
 
 function ForegroundApp() {
   const [images, setImages] = useState([]);
@@ -81,20 +82,6 @@ function ForegroundApp() {
 
   const handleNavigateToAnnotation = () => {
     navigate('/annotation', { state: { selectedImages: Array.from(selectedImages), images, annotations } });
-  };
-
-  const classColors = {
-    "0": "rgba(255, 0, 0, 0.5)",
-    "1": "rgba(0, 255, 0, 0.5)",
-    "2": "rgba(0, 0, 255, 0.5)",
-    "3": "rgba(255, 255, 0, 0.5)",
-    "4": "rgba(0, 255, 255, 0.5)",
-    "5": "rgba(255, 0, 255, 0.5)",
-    "6": "rgba(128, 0, 0, 0.5)",
-    "7": "rgba(0, 128, 0, 0.5)",
-    "8": "rgba(0, 0, 128, 0.5)",
-    "9": "rgba(128, 128, 0 , 0.5)",
-    "10": "rgba(0, 128, 128, 0.5)"
   };
 
   const drawAnnotations = (canvas, imageId) => {
