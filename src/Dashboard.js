@@ -1,24 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import * as d3 from 'd3';
 import axios from 'axios';
+import classColors from './classcolors.ts';
 
 function Dashboard() {
   const [annotations, setAnnotations] = useState([]);
   const [selectedClass, setSelectedClass] = useState(null);
-
-  const classColors = {
-    "0": "rgba(255, 0, 0, 0.5)",
-    "1": "rgba(0, 255, 0, 0.5)",
-    "2": "rgba(0, 0, 255, 0.5)",
-    "3": "rgba(255, 255, 0, 0.5)",
-    "4": "rgba(0, 255, 255, 0.5)",
-    "5": "rgba(255, 0, 255, 0.5)",
-    "6": "rgba(128, 0, 0, 0.5)",
-    "7": "rgba(0, 128, 0, 0.5)",
-    "8": "rgba(0, 0, 128, 0.5)",
-    "9": "rgba(128, 128, 0.5)",
-    "10": "rgba(0, 128, 128, 0.5)"
-  };
 
   useEffect(() => {
     axios.get('http://localhost:5500/api/annotations')
