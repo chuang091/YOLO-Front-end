@@ -15,6 +15,7 @@ function ForegroundApp() {
   const [selectedImages, setSelectedImages] = useState(new Set());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [lastSelectedIndex, setLastSelectedIndex] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
   const navigate = useNavigate();
   // 開啟和關閉模態框的函數
@@ -188,7 +189,7 @@ function ForegroundApp() {
   };
 
   const handelTagClick = () => {
-    handleTagSelectedImages(selectedImages, openModal);
+    handleTagSelectedImages(selectedImages,selectedCategory ,openModal);
   };
 
   const annotatedImageCount = images.filter(image => annotations.some(annotation => annotation.image_id === image._id)).length;
@@ -204,7 +205,7 @@ function ForegroundApp() {
           <CategorySelectorModal
             isOpen={isModalOpen}
             onClose={closeModal}
-            onStart={(category) => console.log("選擇的類別:", category)}
+            onStart={(category) => setSelectedCategory(category)}
           />
         )}
         <button onClick={handleNavigateToAnnotation} disabled={selectedImages.size === 0}>
