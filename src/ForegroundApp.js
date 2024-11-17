@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './App.css';
 
-import { handleTagSelectedImages } from './tag.ts'; // 引入新功能組件
+import { handleTagSelectedImages } from './tag.ts';
 import CategorySelectorModal from './modal.tsx';
 import classColors from './classcolors.ts';
 
@@ -16,24 +16,24 @@ function ForegroundApp() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [lastSelectedIndex, setLastSelectedIndex] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedClasses, setSelectedClasses] = useState(new Set()); // Filter images by class
 
   const navigate = useNavigate();
-  // 開啟和關閉模態框的函數
+
   const openModal = () => {
-    console.log("開啟模態框");
     setIsModalOpen(true);
   };
 
   const closeModal = () => setIsModalOpen(false);
 
   useEffect(() => {
-    axios.get('http://localhost:5500/api/annotations')
+    axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/annotations`)
       .then(response => {
         console.log('Fetched annotations:', response.data);
         const fetchedAnnotations = response.data;
         setAnnotations(fetchedAnnotations);
 
-        axios.get('http://localhost:5500/api/images')
+        axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/images`)
           .then(response => {
             console.log(response.data, fetchedAnnotations);
             const filteredImage = response.data.filter(image => fetchedAnnotations.some(annotation => annotation.image_id === image._id));
@@ -128,7 +128,6 @@ function ForegroundApp() {
   };
 
   const handleImageClick = (event, imageId, index) => {
-    // 如果按下 Ctrl 鍵，則添加或刪除單個項目
     console.log(index);
     if (event.ctrlKey || event.metaKey) {
       setSelectedImages(prevSelectedImages => {
@@ -141,9 +140,7 @@ function ForegroundApp() {
         setLastSelectedIndex(index);
         return newSelectedImages;
       });
-    }
-    // 如果按下 Shift 鍵，則執行範圍選擇
-    else if (event.shiftKey && lastSelectedIndex !== null) {
+    } else if (event.shiftKey && lastSelectedIndex !== null) {
       const start = Math.min(lastSelectedIndex, index);
       const end = Math.max(lastSelectedIndex, index);
 
@@ -155,44 +152,63 @@ function ForegroundApp() {
         console.log(newSelectedImages);
         return newSelectedImages;
       });
-    }
-    // 如果沒有按下任何特殊鍵，僅選擇當前項目
-    else {
+    } else {
       setSelectedImages(new Set([imageId]));
       setLastSelectedIndex(index);
     }
   };
 
-  const handleDoubleClick = (imageId) => {
-    axios.delete(`http://localhost:5500/api/images/${imageId}`)
-      .then(response => {
-        console.log('Deleted image and annotations:', response.data);
-        const updatedImages = images.filter(image => image._id !== imageId);
-        const updatedAnnotations = annotations.filter(annotation => annotation.image_id !== imageId);
-        setImages(updatedImages);
-        setAnnotations(updatedAnnotations);
-        setSelectedImages(prevSelectedImages => {
-          const newSelectedImages = new Set(prevSelectedImages);
-          newSelectedImages.delete(imageId);
-          return newSelectedImages;
-        });
-      })
-      .catch(error => {
-        console.error('There was an error deleting the image and annotations!', error);
-      });
-  };
-
   const handleDeleteSelectedImages = () => {
     selectedImages.forEach(imageId => {
-      handleDoubleClick(imageId);
+      axios.delete(`${process.env.REACT_APP_API_BASE_URL}/api/images/${imageId}`)
+        .then(response => {
+          console.log('Deleted image and annotations:', response.data);
+          const updatedImages = images.filter(image => image._id !== imageId);
+          const updatedAnnotations = annotations.filter(annotation => annotation.image_id !== imageId);
+          setImages(updatedImages);
+          setAnnotations(updatedAnnotations);
+          setSelectedImages(prevSelectedImages => {
+            const newSelectedImages = new Set(prevSelectedImages);
+            newSelectedImages.delete(imageId);
+            return newSelectedImages;
+          });
+        })
+        .catch(error => {
+          console.error('There was an error deleting the image and annotations!', error);
+        });
     });
   };
 
+// 處理類別篩選變更
+const handleClassFilterChange = (classId) => {
+  setSelectedClasses(prevSelectedClasses => {
+    const newSelectedClasses = new Set(prevSelectedClasses);
+    if (newSelectedClasses.has(classId)) {
+      newSelectedClasses.delete(classId); // 如果已選擇該類別則移除
+    } else {
+      newSelectedClasses.add(classId); // 如果未選擇該類別則添加
+    }
+    return newSelectedClasses;
+  });
+};
+
   const handelTagClick = () => {
-    handleTagSelectedImages(selectedImages,selectedCategory ,openModal);
+    handleTagSelectedImages(openModal);
   };
 
-  const annotatedImageCount = images.filter(image => annotations.some(annotation => annotation.image_id === image._id)).length;
+// 統計已標記的圖片數量
+const annotatedImageCount = images.filter(image => 
+  annotations.some(annotation => annotation.image_id === image._id)
+).length;
+
+// 根據類別篩選圖片
+const filteredImages = images.filter(image => {
+  // 如果沒有選擇任何類別，返回所有圖片
+  if (selectedClasses.size === 0) return true;
+
+  // 檢查 image 是否有 category，並且它的 category 包含在選中的類別中
+  return image.category && selectedClasses.has(image.category);
+});
 
   return (
     <div className="App">
@@ -205,12 +221,49 @@ function ForegroundApp() {
           <CategorySelectorModal
             isOpen={isModalOpen}
             onClose={closeModal}
-            onStart={(category) => setSelectedCategory(category)}
+            onStart={(category, images) => {
+              setSelectedCategory(category);
+            }}
+            selectedImages={Array.from(selectedImages)}
           />
         )}
         <button onClick={handleNavigateToAnnotation} disabled={selectedImages.size === 0}>
           前往標記頁面
         </button>
+        <div className="class-filter">
+          <label>
+            <input
+              type="checkbox"
+              value="1"
+              onChange={() => handleClassFilterChange(1)}
+            />
+            類別 1
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              value="2"
+              onChange={() => handleClassFilterChange(2)}
+            />
+            類別 2
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              value="3"
+              onChange={() => handleClassFilterChange(3)}
+            />
+            類別 3
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              value="4"
+              onChange={() => handleClassFilterChange(4)}
+            />
+            類別 4
+          </label>
+        </div>
         <div className="stats">
           <p>總圖片數量: {images.length}</p>
           <p>帶標記的圖片數量: {annotatedImageCount}</p>
@@ -218,15 +271,13 @@ function ForegroundApp() {
       </div>
       {isDataLoaded ? (
         <div className="image-gallery">
-          {images
-            .filter(image => annotations.some(annotation => annotation.image_id === image._id)) // 確保圖片有標記
-            .slice(0, imagesToShow)  // 控制顯示數量
+          {filteredImages
+            .slice(0, imagesToShow)
             .map((image, index) => (
               <div
                 key={image._id || index}
                 className={`image-container ${selectedImages.has(image._id) ? 'selected' : ''}`}
                 onClick={(e) => handleImageClick(e, image._id, image.index)}
-                onDoubleClick={() => handleDoubleClick(image._id)}
               >
                 {image.data ? (
                   <>

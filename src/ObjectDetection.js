@@ -48,7 +48,7 @@ function ObjectDetection({ containerId, imageId, imageName, imageData, isObjectD
                             "7": "5"
                         };
                     try {
-                        const response = await axios.post('http://localhost:5500/api/annotations', {
+                        const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/annotations`, {
                             image_id: imageId,
                             coordinates: [point.x1,point.y1,point.x2,point.y1,point.x2,point.y2,point.x1,point.y2],
                             // call class map result["name"] to get the class name

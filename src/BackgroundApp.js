@@ -9,7 +9,7 @@ function BackgroundApp() {
   const [downloadPath, setDownloadPath] = useState('C:/Users/chuan/OneDrive/桌面/臺灣寶圖專題/images');
 
   useEffect(() => {
-    axios.get('http://localhost:5500/api/background_images')
+    axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/background_images`)
       .then(response => {
         console.log('Fetched background images:', response.data);
         setImages(response.data);
@@ -41,7 +41,7 @@ function BackgroundApp() {
 
   const handleDeleteSelectedImages = () => {
     selectedImages.forEach(imageId => {
-      axios.delete(`http://localhost:5500/api/background_images/${imageId}`)
+      axios.delete(`${process.env.REACT_APP_API_BASE_URL}/api/background_images/${imageId}`)
         .then(response => {
           console.log('Deleted background image:', response.data);
           setImages(images.filter(image => image._id !== imageId));

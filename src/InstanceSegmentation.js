@@ -61,7 +61,7 @@ polygonDiv.ondblclick = async () => {
 
   try {
     // 發送請求儲存分割區域
-    const response = await axios.post('http://localhost:5500/api/annotations', {
+    const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/annotations`, {
       image_id: imageId,
       coordinates: xSegments.flatMap((x, index) => [x, ySegments[index]]),  // 展開座標
       class: classMap[segment.class] || 'unknown'  // 發送分割區域的 class
