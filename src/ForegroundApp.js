@@ -207,8 +207,6 @@ function ForegroundApp() {
             onClose={closeModal}
             onStart={(category, images) => {
               setSelectedCategory(category);
-              console.log('選擇的類別:', category);
-              console.log('選中的圖片:', images);
             }}
             selectedImages={Array.from(selectedImages)}
           />

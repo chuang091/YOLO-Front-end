@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
 interface CategorySelectorModalProps {
   isOpen: boolean;
@@ -28,9 +29,16 @@ const CategorySelectorModal: React.FC<CategorySelectorModalProps> = ({
   };
 
   const handleStart = () => {
-    console.log('Selected Images:', selectedImages);
     if (selectedCategory !== null) {
       onStart(selectedCategory, selectedImages);
+      axios.post(`${process.env.REACT_APP_API_BASE_URL}/tag_images`, {
+        category: selectedCategory,
+        images: selectedImages.map((image) => image.id),
+      }).then((response) => {
+        console.log('Tagging success', response);
+      }).catch((error) => {
+        console.error('Tagging failed', error);
+      });
       onClose(); // 關閉 Modal
     }
   };
