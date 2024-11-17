@@ -40,7 +40,7 @@ function UploadImage() {
     }
 
     const uploadPromises = selectedFiles.map((file, index) => {
-      return axios.post('http://localhost:5500/upload', { image: file }, {
+      return axios.post(`${process.env.REACT_APP_API_BASE_URL}/upload`, { image: file }, {
         onUploadProgress: progressEvent => {
           const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
           setUploadProgress(prevProgress => ({

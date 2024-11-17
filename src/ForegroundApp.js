@@ -27,13 +27,13 @@ function ForegroundApp() {
   const closeModal = () => setIsModalOpen(false);
 
   useEffect(() => {
-    axios.get('http://localhost:5500/api/annotations')
+    axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/annotations`)
       .then(response => {
         console.log('Fetched annotations:', response.data);
         const fetchedAnnotations = response.data;
         setAnnotations(fetchedAnnotations);
 
-        axios.get('http://localhost:5500/api/images')
+        axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/images`)
           .then(response => {
             console.log(response.data, fetchedAnnotations);
             const filteredImage = response.data.filter(image => fetchedAnnotations.some(annotation => annotation.image_id === image._id));
@@ -164,7 +164,7 @@ function ForegroundApp() {
   };
 
   const handleDoubleClick = (imageId) => {
-    axios.delete(`http://localhost:5500/api/images/${imageId}`)
+    axios.delete(`${process.env.REACT_APP_API_BASE_URL}/api/images/${imageId}`)
       .then(response => {
         console.log('Deleted image and annotations:', response.data);
         const updatedImages = images.filter(image => image._id !== imageId);

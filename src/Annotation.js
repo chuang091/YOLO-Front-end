@@ -15,7 +15,7 @@ import classColors from './classcolors.ts';
 // Function to process and set an image on the server
 const setImage = async (imageData, imageName) => {
   try {
-    await axios.post('http://localhost:5500/set_image2', {
+    await axios.post(`${process.env.REACT_APP_API_BASE_URL}/set_image2`, {
       image_data: imageData,
       image_name: imageName
     });
@@ -32,7 +32,7 @@ const fetchObjectDetection = async (imageData, imageName, imageID, setDetectionR
       image_name: imageID,
       image_data: `data:image/jpeg;base64,${imageData}`
     };
-    const response = await axios.post('http://localhost:5500/process_image_od', requestData);
+    const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/process_image_od`, requestData);
     setDetectionResults(prev => ({
       ...prev,
       [imageID]: response.data
@@ -50,7 +50,7 @@ const fetchInstanceSegmentation = async (imageData, imageName, imageID, setSegme
       image_name: imageID,
       image_data: `data:image/jpeg;base64,${imageData}`
     };
-    const response = await axios.post('http://localhost:5500/process_image', requestData);
+    const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/process_image`, requestData);
     setSegmentationResults(prev => ({
       ...prev,
       [imageID]: response.data
@@ -163,7 +163,7 @@ function Annotation() {
   };
 
   const handleDeleteAnnotation = (id) => {
-    axios.delete(`http://localhost:5500/api/annotations/${id}`)
+    axios.delete(`${process.env.REACT_APP_API_BASE_URL}/api/annotations/${id}`)
       .then(response => {
         console.log('Annotation deleted:', response.data);
         const updatedAnnotations = annotations.filter(annotation => annotation._id !== id);

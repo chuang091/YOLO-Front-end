@@ -8,7 +8,7 @@ function Dashboard() {
   const [selectedClass, setSelectedClass] = useState(null);
 
   useEffect(() => {
-    axios.get('http://localhost:5500/api/annotations')
+    axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/annotations`)
       .then(response => {
         console.log('Fetched annotations:', response.data);
         setAnnotations(response.data);

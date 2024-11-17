@@ -105,7 +105,7 @@ const PolygonDrawer = ({ canvasId, imageId, existingAnnotations, polygonClass, i
       coordinates: points.flat(),
       class: polygonClass - 1
     };
-    axios.post('http://localhost:5500/api/annotations', data)
+    axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/annotations`, data)
       .then(response => {
         console.log('Polygon saved:', response.data);
         setAllPolygons([...allPolygons, { imageId, points }]);

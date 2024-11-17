@@ -36,7 +36,7 @@ function MarkImages() {
     const count = parseInt(selectedCount, 10) || parseInt(customCount, 10);
 
     // 調用新的 API: /api/start-marking
-    axios.post('http://localhost:5500/start-marking', { count })
+    axios.post(`${process.env.REACT_APP_API_BASE_URL}/start-marking`, { count })
       .then(response => {
         const fetchedImages = response.data.map((image, index) => ({
           data: image.data,  // Base64 數據，假設後端現在返回 'data' 欄位

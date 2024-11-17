@@ -117,7 +117,7 @@ const Sam = ({ canvasId, imageId, existingAnnotations, isSamModel, polygonClass 
     console.log('Saving annotation:', data);
 
     try {
-      const response = await axios.post('http://localhost:5500/api/annotations', data);
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/annotations`, data);
       console.log('Annotation saved:', response.data);
       return response.data;  // 返回 Promise
     } catch (error) {
@@ -132,7 +132,7 @@ const Sam = ({ canvasId, imageId, existingAnnotations, isSamModel, polygonClass 
     const coordinatesJson = JSON.stringify(newPoints);
     const actionJson = JSON.stringify(newActions);
 
-    return fetch('http://localhost:5500/sam', {
+    return fetch(`${process.env.REACT_APP_API_BASE_URL}/sam`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
