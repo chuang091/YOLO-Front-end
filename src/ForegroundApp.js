@@ -189,7 +189,7 @@ function ForegroundApp() {
   };
 
   const handelTagClick = () => {
-    handleTagSelectedImages(selectedImages,selectedCategory ,openModal);
+    handleTagSelectedImages(openModal);
   };
 
   const annotatedImageCount = images.filter(image => annotations.some(annotation => annotation.image_id === image._id)).length;
@@ -205,7 +205,12 @@ function ForegroundApp() {
           <CategorySelectorModal
             isOpen={isModalOpen}
             onClose={closeModal}
-            onStart={(category) => setSelectedCategory(category)}
+            onStart={(category, images) => {
+              setSelectedCategory(category);
+              console.log('選擇的類別:', category);
+              console.log('選中的圖片:', images);
+            }}
+            selectedImages={Array.from(selectedImages)}
           />
         )}
         <button onClick={handleNavigateToAnnotation} disabled={selectedImages.size === 0}>
