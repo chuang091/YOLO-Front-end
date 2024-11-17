@@ -31,9 +31,11 @@ const CategorySelectorModal: React.FC<CategorySelectorModalProps> = ({
   const handleStart = () => {
     if (selectedCategory !== null) {
       onStart(selectedCategory, selectedImages);
+      console.log('selectedImages', selectedImages);
+      console.log('selectedCategory', selectedCategory);
       axios.post(`${process.env.REACT_APP_API_BASE_URL}/tag_images`, {
         category: selectedCategory,
-        images: selectedImages.map((image) => image.id),
+        images: selectedImages,
       }).then((response) => {
         console.log('Tagging success', response);
       }).catch((error) => {
