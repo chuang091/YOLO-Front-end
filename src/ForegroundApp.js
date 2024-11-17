@@ -281,7 +281,7 @@ const filteredImages = images.filter(image => {
               >
                 {image.data ? (
                   <>
-                    <div className="image-name">{image.filename}</div>
+                    <div className="image-name">{image.index}</div>
                     <img
                       src={`data:image/jpeg;base64,${image.data}`}
                       alt={image.filename}
