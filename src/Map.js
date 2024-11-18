@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Rectangle } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { MapClickHandler } from './MapClickHandler'; // 引入外部點擊處理模組
 
 // 設定 Marker 的圖標
 delete L.Icon.Default.prototype._getIconUrl;
@@ -42,13 +43,11 @@ const MapComponent = () => {
                 const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/coordinate`);
                 const data = await response.json();
 
-                // 確保資料格式為 ["x_y", "x_y", ...]
                 const tileCoordinates = data.map((coord) => {
                     const [x, y] = coord.split('_').map(Number);
                     return { x, y };
                 });
 
-                // 計算 zoom level = 15 的範圍
                 const zoom15 = 15;
                 const zoom17 = 17;
                 const tileSize = 256;
@@ -68,11 +67,17 @@ const MapComponent = () => {
         fetchCoordinates();
     }, []);
 
+    // 新增高亮範圍
+    const addHighlight = (bounds) => {
+        setHighlightBounds((prevBounds) => [...prevBounds, bounds]);
+    };
+
     return (
         <MapContainer center={position} zoom={15} style={{ height: '100vh', width: '100%' }}>
             <TileLayer
                 url="https://gis.sinica.edu.tw/tileserver/file-exists.php?img=JM20K_1921-jpg-{z}-{x}-{y}"
             />
+            <MapClickHandler addHighlight={addHighlight} />
             {highlightBounds.map((bounds, index) => (
                 <Rectangle
                     key={index}
