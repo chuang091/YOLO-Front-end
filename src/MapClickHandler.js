@@ -1,6 +1,8 @@
 import { useMapEvents } from 'react-leaflet';
+import { useNavigate } from 'react-router-dom';  
 
 const tileSize = 256;
+
 
 // 將 `z-level=17` 瓦片座標轉換為 `z-level=15` 的經緯度範圍
 const convertTileCoordinates = (tileX17, tileY17, tileSize, scale15, scale17) => {
@@ -22,6 +24,7 @@ const convertTileCoordinates = (tileX17, tileY17, tileSize, scale15, scale17) =>
 };
 
 export const MapClickHandler = ({ addHighlight }) => {
+    const navigate = useNavigate();  // 用於導航
     useMapEvents({
         click: (e) => {
             const zoom17 = 17;
@@ -43,6 +46,31 @@ export const MapClickHandler = ({ addHighlight }) => {
             const tileY17 = Math.floor(worldCoordinateY17 / tileSize);
 
             console.log(`Zoom 17 Tile Coordinate: x: ${tileX17}, y: ${tileY17}`);
+
+            // Fetch image URL from the server
+            fetch(`${process.env.REACT_APP_API_BASE_URL}/api/resolve_image`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    x: tileX17,
+                    y: tileY17,
+                }),
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    const fetchedImages = [{
+                        data: data.image,  // Base64 數據，假設後端現在返回 'image' 欄位
+                        filename: `${tileX17}_${tileY17}.jpg`,
+                        _id: data._id  // 從數據中獲取 _id
+                      }];
+                    
+                      navigate('/annotation', { state: { images: fetchedImages, selectedImages: fetchedImages.map(img => img._id) } });
+                })
+                .catch((error) => {
+                    console.error('Error fetching image URL:', error);
+                });
 
             // 轉換到 `z-level=15` 的範圍
             const bounds = convertTileCoordinates(tileX17, tileY17, tileSize, scale15, scale17);
