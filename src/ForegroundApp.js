@@ -29,20 +29,20 @@ function ForegroundApp() {
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/annotations`)
       .then(response => {
-        console.log('Fetched annotations:', response.data);
+        //console.log('Fetched annotations:', response.data);
         const fetchedAnnotations = response.data;
         setAnnotations(fetchedAnnotations);
 
         axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/images`)
           .then(response => {
-            console.log(response.data, fetchedAnnotations);
+            //console.log(response.data, fetchedAnnotations);
             const filteredImage = response.data.filter(image => fetchedAnnotations.some(annotation => annotation.image_id === image._id));
-            console.log('filteredImage', filteredImage);
+            //console.log('filteredImage', filteredImage);
             const imagesWithIndex = filteredImage.map((item, index) => ({
               ...item,
               index,
             }));
-            console.log('Fetched images:', imagesWithIndex);
+            //console.log('Fetched images:', imagesWithIndex);
             setImages(imagesWithIndex);
 
             setTimeout(() => {
@@ -128,7 +128,7 @@ function ForegroundApp() {
   };
 
   const handleImageClick = (event, imageId, index) => {
-    console.log(index);
+    //console.log(index);
     if (event.ctrlKey || event.metaKey) {
       setSelectedImages(prevSelectedImages => {
         const newSelectedImages = new Set(prevSelectedImages);
@@ -149,7 +149,7 @@ function ForegroundApp() {
         for (let i = start; i <= end; i++) {
           newSelectedImages.add(images[i]._id);
         }
-        console.log(newSelectedImages);
+        //console.log(newSelectedImages);
         return newSelectedImages;
       });
     } else {
@@ -162,7 +162,7 @@ function ForegroundApp() {
     selectedImages.forEach(imageId => {
       axios.delete(`${process.env.REACT_APP_API_BASE_URL}/api/images/${imageId}`)
         .then(response => {
-          console.log('Deleted image and annotations:', response.data);
+          //console.log('Deleted image and annotations:', response.data);
           const updatedImages = images.filter(image => image._id !== imageId);
           const updatedAnnotations = annotations.filter(annotation => annotation.image_id !== imageId);
           setImages(updatedImages);
