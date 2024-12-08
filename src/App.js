@@ -6,7 +6,7 @@ import Annotation from './Annotation';
 import Dashboard from './Dashboard';
 import UploadImage from './UploadImage';
 import MarkImages from './MarkImages'; // 引入新功能組件
-import Map from './Map'; // 引入新功能組件
+import Map from './map/Map'; // 引入新功能組件
 import './App.css';
 
 function MainApp() {

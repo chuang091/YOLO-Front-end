@@ -11,7 +11,7 @@ function ForegroundApp() {
   const [images, setImages] = useState([]);
   const [annotations, setAnnotations] = useState([]);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
-  const [imagesToShow, setImagesToShow] = useState(100);
+  const [imagesToShow, setImagesToShow] = useState(1000);
   const [selectedImages, setSelectedImages] = useState(new Set());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [lastSelectedIndex, setLastSelectedIndex] = useState(null);
