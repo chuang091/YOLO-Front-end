@@ -114,17 +114,22 @@ const MapComponent = () => {
           />
         ))}
       </MapContainer>
-      <button
-        onClick={submitSelection}
-        style={{
-          position: "absolute",
-          top: "10px",
-          left: "10px",
-          zIndex: 1000,
-        }}
-      >
-        Submit Selection
-      </button>
+      <div style={{
+            position: "absolute",
+            top: "10px",
+            right: "10px",
+            zIndex: 1000,
+            display: 'flex',
+            flexDirection: 'row',  // 水平排列
+          }}>
+        <button
+          onClick={submitSelection}
+          
+        >
+          Submit Selection
+        </button>
+        <p>Selected Tiles Count: {selectedTiles.length}</p>
+      </div>
     </>
   );
 };
